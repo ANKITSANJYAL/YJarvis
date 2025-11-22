@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Command Processor</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { color: #1a73e8; }
+    .test-section {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    input[type="text"] {
+      width: calc(100% - 120px);
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    button:hover { background: #1557b0; }
+    .result {
+      margin-top: 15px;
+      padding: 15px;
+      background: white;
+      border-left: 4px solid #1a73e8;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .examples {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .example-btn {
+      background: #f1f3f4;
+      color: #1a73e8;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      text-align: left;
+    }
+    .example-btn:hover {
+      background: #e8f0fe;
+    }
+    .match-info {
+      background: #e6f4ea;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 13px;
+    }
+    .no-match {
+      background: #fff3cd;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Command Processor Test</h1>
+    <p>Test command pattern matching and action mapping</p>
+
+    <div class="test-section">
+      <h3>Test Command Parsing</h3>
+      <div>
+        <input type="text" id="commandInput" placeholder="Enter a command...">
+        <button id="testBtn">Test</button>
+      </div>
+      <div id="result"></div>
+
+      <h4 style="margin-top: 20px;">Quick Examples:</h4>
+      <div class="examples">
+        <button class="example-btn" data-cmd="play">play</button>
+        <button class="example-btn" data-cmd="pause">pause</button>
+        <button class="example-btn" data-cmd="skip 30 seconds">skip 30 seconds</button>
+        <button class="example-btn" data-cmd="rewind 10">rewind 10</button>
+        <button class="example-btn" data-cmd="speed up">speed up</button>
+        <button class="example-btn" data-cmd="slow down">slow down</button>
+        <button class="example-btn" data-cmd="normal speed">normal speed</button>
+        <button class="example-btn" data-cmd="mute">mute</button>
+        <button class="example-btn" data-cmd="summarize">summarize</button>
+        <button class="example-btn" data-cmd="quiz">quiz</button>
+        <button class="example-btn" data-cmd="what is AI?">what is AI?</button>
+        <button class="example-btn" data-cmd="go to 60">go to 60</button>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h3>Command Patterns Reference</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <thead>
+          <tr style="background: #e8f0fe;">
+            <th style="padding: 10px; text-align: left;">Pattern</th>
+            <th style="padding: 10px; text-align: left;">Action</th>
+            <th style="padding: 10px; text-align: left;">Example</th>
+          </tr>
+        </thead>
+        <tbody id="patternTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { CommandProcessor } from '../content/command-processor.js';
+
+    // Mock player controller for testing
+    class MockPlayerController {
+      play() { return true; }
+      pause() { return true; }
+      togglePlayPause() { return true; }
+      skip(s) { return true; }
+      rewind(s) { return true; }
+      seek(s) { return true; }
+      increaseSpeed() { return 1.25; }
+      decreaseSpeed() { return 0.75; }
+      normalSpeed() { return true; }
+      setPlaybackRate(r) { return true; }
+      mute() { return true; }
+      unmute() { return true; }
+      setVolume(v) { return true; }
+    }
+
+    const mockPlayer = new MockPlayerController();
+    const processor = new CommandProcessor(mockPlayer);
+
+    // Test command
+    function testCommand(command) {
+      const result = document.getElementById('result');
+      const match = processor.matchCommand(command);
+
+      if (match) {
+        result.innerHTML = `
+          <div class="match-info">
+            <strong>✓ Matched Pattern</strong><br>
+            Action: <code>${match.action}</code><br>
+            ${match.param ? `Parameter: <code>${match.param}</code><br>` : ''}
+            Original: "${match.original}"
+          </div>
+        `;
+      } else {
+        result.innerHTML = `
+          <div class="no-match">
+            <strong>⚠️ No Pattern Match</strong><br>
+            This will be treated as an AI query
+          </div>
+        `;
+      }
+    }
+
+    // Event listeners
+    document.getElementById('testBtn').addEventListener('click', () => {
+      const command = document.getElementById('commandInput').value;
+      if (command) {
+        testCommand(command);
+      }
+    });
+
+    document.getElementById('commandInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const command = document.getElementById('commandInput').value;
+        if (command) {
+          testCommand(command);
+        }
+      }
+    });
+
+    // Example buttons
+    document.querySelectorAll('.example-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cmd = btn.getAttribute('data-cmd');
+        document.getElementById('commandInput').value = cmd;
+        testCommand(cmd);
+      });
+    });
+
+    // Display pattern table
+    const patterns = processor.commandPatterns;
+    const tableBody = document.getElementById('patternTable');
+    
+    const examples = {
+      'play': 'play',
+      'pause': 'pause',
+      'toggle': 'toggle',
+      'skip': 'skip 30',
+      'rewind': 'rewind 10',
+      'seek': 'go to 60',
+      'speedUp': 'speed up',
+      'slowDown': 'slow down',
+      'normalSpeed': 'normal speed',
+      'setSpeed': 'set speed to 1.5',
+      'mute': 'mute',
+      'unmute': 'unmute',
+      'setVolume': 'volume 50',
+      'summarize': 'summarize',
+      'quiz': 'quiz'
+    };
+
+    patterns.forEach(p => {
+      const row = document.createElement('tr');
+      row.style.borderBottom = '1px solid #e0e0e0';
+      row.innerHTML = `
+        <td style="padding: 10px; font-family: monospace; font-size: 12px;">${p.pattern}</td>
+        <td style="padding: 10px;">${p.action}</td>
+        <td style="padding: 10px; color: #5f6368;">${examples[p.action] || '-'}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+  </script>
+</body>
+</html>

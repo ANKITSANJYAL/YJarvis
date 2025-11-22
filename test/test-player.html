@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Player Controller</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { color: #1a73e8; }
+    .video-section {
+      margin: 20px 0;
+    }
+    video {
+      width: 100%;
+      max-width: 640px;
+      border-radius: 8px;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    button:hover { background: #1557b0; }
+    button:active { background: #0d47a1; }
+    .status {
+      margin: 20px 0;
+      padding: 15px;
+      background: #e8f0fe;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .section-title {
+      font-weight: 600;
+      margin: 20px 0 10px 0;
+      color: #5f6368;
+    }
+    input[type="number"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 80px;
+      margin-right: 10px;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Player Controller Test</h1>
+    <p>Test video playback controls</p>
+
+    <div class="video-section">
+      <video id="testVideo" controls>
+        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <div class="status" id="status">
+      Status: Ready
+    </div>
+
+    <div class="section-title">Playback Controls</div>
+    <div class="controls">
+      <button id="play">▶️ Play</button>
+      <button id="pause">⏸️ Pause</button>
+      <button id="toggle">⏯️ Toggle</button>
+    </div>
+
+    <div class="section-title">Time Navigation</div>
+    <div class="controls">
+      <button id="skip10">Skip +10s</button>
+      <button id="skip30">Skip +30s</button>
+      <button id="rewind10">Rewind -10s</button>
+      <button id="rewind30">Rewind -30s</button>
+    </div>
+    <div class="input-group">
+      <label>Seek to:</label>
+      <input type="number" id="seekInput" value="0" min="0">
+      <button id="seekBtn">Go</button>
+    </div>
+
+    <div class="section-title">Speed Controls</div>
+    <div class="controls">
+      <button id="speedUp">⏩ Speed Up</button>
+      <button id="slowDown">⏪ Slow Down</button>
+      <button id="normalSpeed">1x Normal</button>
+    </div>
+    <div class="input-group">
+      <label>Set speed:</label>
+      <input type="number" id="speedInput" value="1.0" min="0.25" max="2" step="0.25">
+      <button id="setSpeedBtn">Set</button>
+    </div>
+
+    <div class="section-title">Volume Controls</div>
+    <div class="controls">
+      <button id="mute">🔇 Mute</button>
+      <button id="unmute">🔊 Unmute</button>
+    </div>
+    <div class="input-group">
+      <label>Set volume:</label>
+      <input type="number" id="volumeInput" value="100" min="0" max="100">
+      <button id="setVolumeBtn">Set</button>
+    </div>
+
+    <div class="section-title">Status Check</div>
+    <div class="controls">
+      <button id="getStatus">Get Full Status</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { PlayerController } from '../content/player-controller.js';
+
+    // Wait for video to load
+    const video = document.getElementById('testVideo');
+    video.addEventListener('loadedmetadata', () => {
+      console.log('Video loaded');
+    });
+
+    // Initialize controller
+    let controller;
+    try {
+      controller = new PlayerController();
+      updateStatus('✓ PlayerController initialized');
+    } catch (error) {
+      updateStatus('❌ Error: ' + error.message);
+    }
+
+    function updateStatus(message) {
+      const status = document.getElementById('status');
+      status.textContent = message;
+      console.log(message);
+    }
+
+    // Update status periodically
+    setInterval(() => {
+      if (controller) {
+        const s = controller.getStatus();
+        updateStatus(
+          `Playing: ${s.playing} | ` +
+          `Time: ${s.currentTime.toFixed(1)}s / ${s.duration.toFixed(1)}s | ` +
+          `Speed: ${s.playbackRate}x | ` +
+          `Volume: ${(s.volume * 100).toFixed(0)}% | ` +
+          `Muted: ${s.muted}`
+        );
+      }
+    }, 100);
+
+    // Playback controls
+    document.getElementById('play').onclick = () => {
+      controller.play();
+      updateStatus('▶️ Playing');
+    };
+
+    document.getElementById('pause').onclick = () => {
+      controller.pause();
+      updateStatus('⏸️ Paused');
+    };
+
+    document.getElementById('toggle').onclick = () => {
+      controller.togglePlayPause();
+      updateStatus('⏯️ Toggled');
+    };
+
+    // Time controls
+    document.getElementById('skip10').onclick = () => {
+      controller.skip(10);
+      updateStatus('⏭️ Skipped 10s');
+    };
+
+    document.getElementById('skip30').onclick = () => {
+      controller.skip(30);
+      updateStatus('⏭️ Skipped 30s');
+    };
+
+    document.getElementById('rewind10').onclick = () => {
+      controller.rewind(10);
+      updateStatus('⏮️ Rewound 10s');
+    };
+
+    document.getElementById('rewind30').onclick = () => {
+      controller.rewind(30);
+      updateStatus('⏮️ Rewound 30s');
+    };
+
+    document.getElementById('seekBtn').onclick = () => {
+      const time = parseFloat(document.getElementById('seekInput').value);
+      controller.seek(time);
+      updateStatus(`🎯 Seeked to ${time}s`);
+    };
+
+    // Speed controls
+    document.getElementById('speedUp').onclick = () => {
+      const rate = controller.increaseSpeed();
+      updateStatus(`⏩ Speed: ${rate}x`);
+    };
+
+    document.getElementById('slowDown').onclick = () => {
+      const rate = controller.decreaseSpeed();
+      updateStatus(`⏪ Speed: ${rate}x`);
+    };
+
+    document.getElementById('normalSpeed').onclick = () => {
+      controller.normalSpeed();
+      updateStatus('🎬 Speed: 1x');
+    };
+
+    document.getElementById('setSpeedBtn').onclick = () => {
+      const rate = parseFloat(document.getElementById('speedInput').value);
+      controller.setPlaybackRate(rate);
+      updateStatus(`⚡ Speed set to ${rate}x`);
+    };
+
+    // Volume controls
+    document.getElementById('mute').onclick = () => {
+      controller.mute();
+      updateStatus('🔇 Muted');
+    };
+
+    document.getElementById('unmute').onclick = () => {
+      controller.unmute();
+      updateStatus('🔊 Unmuted');
+    };
+
+    document.getElementById('setVolumeBtn').onclick = () => {
+      const vol = parseInt(document.getElementById('volumeInput').value) / 100;
+      controller.setVolume(vol);
+      updateStatus(`🔊 Volume: ${(vol * 100).toFixed(0)}%`);
+    };
+
+    // Status check
+    document.getElementById('getStatus').onclick = () => {
+      const status = controller.getStatus();
+      updateStatus(JSON.stringify(status, null, 2));
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YJarvis Settings</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🎤 YJarvis</h1>
+    <p class="subtitle">AI Voice Assistant for YouTube</p>
+
+    <div class="section">
+      <label for="apiKey">OpenAI API Key:</label>
+      <input 
+        type="password" 
+        id="apiKey" 
+        placeholder="sk-proj-..."
+      >
+      <button id="saveBtn">Save</button>
+    </div>
+
+    <div class="section">
+      <div id="status" class="status"></div>
+    </div>
+
+    <div class="section">
+      <h3>Quick Guide</h3>
+      <ul class="guide">
+        <li>Click the 🎤 button on YouTube</li>
+        <li>Say commands like:</li>
+        <li class="command">"pause"</li>
+        <li class="command">"skip 30 seconds"</li>
+        <li class="command">"speed up"</li>
+        <li class="command">"summarize"</li>
+        <li class="command">"quiz me"</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

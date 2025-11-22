@@ -1,0 +1,130 @@
+{
+  "title": "Voice-Controlled YouTube AI Extension (OpenAI Backend)",
+  "projectGoal": "The objective is to create a Chrome Extension that transforms the YouTube viewing experience by enabling hands-free, voice-activated control and integrating generative AI (LLM) capabilities for instant content analysis, summarization, and interactive learning.",
+  "technicalStackOverview": [
+    {
+      "component": "Extension Framework",
+      "technology": "HTML, JavaScript, Chrome API (Manifest V3)",
+      "role": "Core structure, message passing, and storage."
+    },
+    {
+      "component": "Player Interaction",
+      "technology": "Content Scripts, YouTube Player API (via DOM)",
+      "role": "Controls video playback, speed, and time seeking."
+    },
+    {
+      "component": "Voice Recognition (STT)",
+      "technology": "Native Web Speech API (in Content/Popup)",
+      "role": "Converts user speech to text commands."
+    },
+    {
+      "component": "Generative AI (LLM)",
+      "technology": "OpenAI API (`gpt-4o-mini`)",
+      "role": "Generates summaries, key takeaways, and quizzes from transcripts with low latency."
+    },
+    {
+      "component": "Text-to-Speech (TTS)",
+      "technology": "OpenAI TTS API (`tts-1`)",
+      "role": "Provides natural voice responses to user queries, prioritized for speed."
+    },
+    {
+      "component": "Persistent Storage",
+      "technology": "Chrome Storage API",
+      "role": "Stores user settings and API key locally."
+    }
+  ],
+  "coreFeatures": [
+    {
+      "feature": "A: Voice Control & Player Interaction",
+      "deliverables": [
+        {
+          "deliverable": "Speech-to-Text (STT)",
+          "apiMethod": "`window.SpeechRecognition` (Web Speech API)",
+          "notesForDeveloper": "Must be initialized on the main YouTube page via the Content Script for best access."
+        },
+        {
+          "deliverable": "Player Control",
+          "apiMethod": "DOM Manipulation (`document.querySelector`)",
+          "notesForDeveloper": "Target the main `<video>` or player element to execute commands like `video.pause()`, `video.play()`, `video.currentTime += 10`, `video.playbackRate = 2.0`."
+        },
+        {
+          "deliverable": "Command Mapping",
+          "apiMethod": "JavaScript `switch/case` logic",
+          "notesForDeveloper": "Map recognized speech (e.g., \"skip 30 seconds,\" \"speed up,\" \"summarize\") to corresponding player/LLM actions."
+        }
+      ]
+    },
+    {
+      "feature": "B: Transcript Acquisition",
+      "deliverables": [
+        {
+          "deliverable": "Transcript Extraction",
+          "apiMethod": "DOM Query Selectors & Traversal",
+          "notesForDeveloper": "Must locate and extract the full, continuous text from the hidden YouTube transcript panel. This is the bottleneck for all AI features. Ensure reliable scraping of time-stamped text blocks."
+        },
+        {
+          "deliverable": "Data Transfer",
+          "apiMethod": "Chrome Message Passing (`chrome.runtime.sendMessage`)",
+          "notesForDeveloper": "Send the extracted, plain-text transcript from the Content Script to the Service Worker."
+        }
+      ]
+    },
+    {
+      "feature": "C: AI Processing (Summarization & Quiz)",
+      "deliverables": [
+        {
+          "deliverable": "Summary Generation",
+          "apiMethod": "OpenAI API (`gpt-4o-mini`)",
+          "notesForDeveloper": "The Service Worker calls the Chat Completions endpoint. This model is chosen for its speed and capability for complex summarization."
+        },
+        {
+          "deliverable": "Quiz Generation",
+          "apiMethod": "OpenAI API (`gpt-4o-mini`)",
+          "notesForDeveloper": "Use JSON Schema within the API request to guarantee structured output for the quiz data, ensuring reliable parsing."
+        },
+        {
+          "deliverable": "Error Handling",
+          "apiMethod": "Exponential Backoff",
+          "notesForDeveloper": "Implement robust retry logic for API calls in the Service Worker."
+        }
+      ]
+    },
+    {
+      "feature": "D: Text-to-Speech (TTS) Responses",
+      "deliverables": [
+        {
+          "deliverable": "Audio Generation",
+          "apiMethod": "OpenAI TTS API (`tts-1`)",
+          "notesForDeveloper": "The Service Worker receives the LLM text response and calls the `audio/speech` endpoint. The `tts-1` model is optimized for low latency and should use the `wav` or `pcm` response format for speed."
+        },
+        {
+          "deliverable": "Audio Playback",
+          "apiMethod": "Chrome Message Passing & Audio API",
+          "notesForDeveloper": "Send the generated audio blob URL back to the Content Script, which will load it into an `Audio` element (`new Audio(url)`) and play it back immediately."
+        }
+      ]
+    }
+  ],
+  "parallelDevelopmentModules": [
+    {
+      "module": "Track 1: Player & Voice Control",
+      "responsibleComponents": "Content Script",
+      "dependenciesHandOff": "Output: Reliable player function calls (e.g., `seek(time)`, `rate(speed)`). Dependency: None (uses native Web APIs)."
+    },
+    {
+      "module": "Track 2: Transcript & Messaging",
+      "responsibleComponents": "Content Script, Service Worker (Messaging)",
+      "dependenciesHandOff": "Output: Clean, single-string transcript sent from Content Script to Service Worker upon request. Dependency: DOM structure knowledge of YouTube transcript panel."
+    },
+    {
+      "module": "Track 3: AI & TTS Engine",
+      "responsibleComponents": "Service Worker",
+      "dependenciesHandOff": "Output: LLM Text (Summary/Quiz) and TTS Audio Blobs. Dependency: API Key provisioning and reliable `fetch` methods."
+    },
+    {
+      "module": "Track 4: Extension UI & UX",
+      "responsibleComponents": "Popup/Side Panel, Content Script (Injected UI)",
+      "dependenciesHandOff": "Output: User interface for settings, feedback, and displaying AI results. Dependency: Must consume output from Tracks 1, 2, and 3 via Message Passing."
+    }
+  ]
+}

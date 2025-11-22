@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: OpenAI Client</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { color: #1a73e8; }
+    .section {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    textarea {
+      min-height: 100px;
+      font-family: monospace;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      margin: 5px;
+    }
+    button:hover { background: #1557b0; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .result {
+      margin-top: 15px;
+      padding: 15px;
+      background: white;
+      border-left: 4px solid #1a73e8;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .error {
+      border-left-color: #d93025;
+      color: #d93025;
+    }
+    .success {
+      border-left-color: #1e8e3e;
+    }
+    .timing {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 5px;
+    }
+    .loading {
+      display: inline-block;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 OpenAI Client Test</h1>
+    <p>Test the OpenAI integration independently</p>
+
+    <div class="section">
+      <h3>API Key</h3>
+      <input type="password" id="apiKey" placeholder="sk-proj-...">
+      <button id="saveKey">Save API Key</button>
+    </div>
+
+    <div class="section">
+      <h3>Sample Transcript</h3>
+      <textarea id="transcript" placeholder="Paste or use sample transcript...">Welcome to this tutorial about artificial intelligence. Today we'll explore how machine learning works. Machine learning is a subset of AI that enables computers to learn from data without explicit programming. There are three main types: supervised learning, unsupervised learning, and reinforcement learning. Supervised learning uses labeled data to train models. For example, showing a computer thousands of cat pictures labeled as 'cat' helps it recognize cats in new images. Unsupervised learning finds patterns in unlabeled data. Reinforcement learning learns through trial and error, receiving rewards for good decisions.</textarea>
+    </div>
+
+    <div class="section">
+      <h3>1. Test Summary Generation</h3>
+      <button id="testSummary">Generate Summary</button>
+      <div id="summaryResult"></div>
+    </div>
+
+    <div class="section">
+      <h3>2. Test Quiz Generation</h3>
+      <button id="testQuiz">Generate Quiz</button>
+      <div id="quizResult"></div>
+    </div>
+
+    <div class="section">
+      <h3>3. Test TTS Generation</h3>
+      <input type="text" id="ttsText" placeholder="Text to speak..." value="Hello! This is a test of the text to speech system.">
+      <button id="testTTS">Generate & Play TTS</button>
+      <div id="ttsResult"></div>
+    </div>
+
+    <div class="section">
+      <h3>4. Test Command Processing</h3>
+      <input type="text" id="commandText" placeholder="Enter a question..." value="What are the main types of machine learning?">
+      <button id="testCommand">Process Command</button>
+      <div id="commandResult"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import OpenAI Client
+    import { OpenAIClient } from '../background/openai-client.js';
+
+    let client = null;
+
+    // Save API Key
+    document.getElementById('saveKey').addEventListener('click', () => {
+      const apiKey = document.getElementById('apiKey').value.trim();
+      if (!apiKey) {
+        alert('Please enter an API key');
+        return;
+      }
+      if (!apiKey.startsWith('sk-')) {
+        alert('Invalid API key format');
+        return;
+      }
+      client = new OpenAIClient(apiKey);
+      localStorage.setItem('openai_api_key', apiKey);
+      alert('API key saved! You can now run tests.');
+    });
+
+    // Load saved API key
+    const savedKey = localStorage.getItem('openai_api_key');
+    if (savedKey) {
+      document.getElementById('apiKey').value = savedKey;
+      client = new OpenAIClient(savedKey);
+    }
+
+    // Test Summary
+    document.getElementById('testSummary').addEventListener('click', async () => {
+      if (!client) {
+        alert('Please save API key first');
+        return;
+      }
+
+      const btn = document.getElementById('testSummary');
+      const result = document.getElementById('summaryResult');
+      const transcript = document.getElementById('transcript').value;
+
+      btn.disabled = true;
+      btn.innerHTML = 'Generating... <span class="loading">⏳</span>';
+      result.innerHTML = '';
+
+      try {
+        const startTime = performance.now();
+        const summary = await client.generateSummary(transcript);
+        const duration = performance.now() - startTime;
+
+        result.className = 'result success';
+        result.innerHTML = `${summary}\n\n<div class="timing">✓ Generated in ${duration.toFixed(0)}ms</div>`;
+      } catch (error) {
+        result.className = 'result error';
+        result.textContent = `Error: ${error.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Generate Summary';
+      }
+    });
+
+    // Test Quiz
+    document.getElementById('testQuiz').addEventListener('click', async () => {
+      if (!client) {
+        alert('Please save API key first');
+        return;
+      }
+
+      const btn = document.getElementById('testQuiz');
+      const result = document.getElementById('quizResult');
+      const transcript = document.getElementById('transcript').value;
+
+      btn.disabled = true;
+      btn.innerHTML = 'Generating... <span class="loading">⏳</span>';
+      result.innerHTML = '';
+
+      try {
+        const startTime = performance.now();
+        const quiz = await client.generateQuiz(transcript);
+        const duration = performance.now() - startTime;
+
+        result.className = 'result success';
+        result.innerHTML = `${JSON.stringify(quiz, null, 2)}\n\n<div class="timing">✓ Generated in ${duration.toFixed(0)}ms</div>`;
+      } catch (error) {
+        result.className = 'result error';
+        result.textContent = `Error: ${error.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Generate Quiz';
+      }
+    });
+
+    // Test TTS
+    document.getElementById('testTTS').addEventListener('click', async () => {
+      if (!client) {
+        alert('Please save API key first');
+        return;
+      }
+
+      const btn = document.getElementById('testTTS');
+      const result = document.getElementById('ttsResult');
+      const text = document.getElementById('ttsText').value;
+
+      btn.disabled = true;
+      btn.innerHTML = 'Generating... <span class="loading">⏳</span>';
+      result.innerHTML = '';
+
+      try {
+        const startTime = performance.now();
+        const audioUrl = await client.generateTTS(text);
+        const duration = performance.now() - startTime;
+
+        // Play audio
+        const audio = new Audio(audioUrl);
+        audio.play();
+
+        result.className = 'result success';
+        result.innerHTML = `Audio generated and playing!\n<div class="timing">✓ Generated in ${duration.toFixed(0)}ms</div>`;
+      } catch (error) {
+        result.className = 'result error';
+        result.textContent = `Error: ${error.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Generate & Play TTS';
+      }
+    });
+
+    // Test Command
+    document.getElementById('testCommand').addEventListener('click', async () => {
+      if (!client) {
+        alert('Please save API key first');
+        return;
+      }
+
+      const btn = document.getElementById('testCommand');
+      const result = document.getElementById('commandResult');
+      const command = document.getElementById('commandText').value;
+      const transcript = document.getElementById('transcript').value;
+
+      btn.disabled = true;
+      btn.innerHTML = 'Processing... <span class="loading">⏳</span>';
+      result.innerHTML = '';
+
+      try {
+        const startTime = performance.now();
+        const answer = await client.processCommand(command, transcript);
+        const duration = performance.now() - startTime;
+
+        result.className = 'result success';
+        result.innerHTML = `${answer}\n\n<div class="timing">✓ Processed in ${duration.toFixed(0)}ms</div>`;
+      } catch (error) {
+        result.className = 'result error';
+        result.textContent = `Error: ${error.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Process Command';
+      }
+    });
+  </script>
+</body>
+</html>
