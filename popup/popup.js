@@ -35,7 +35,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         apiKey: apiKey
       });
 
-      showStatus('API key saved successfully!', 'success');
+      showStatus('✅ Saved! Opening YouTube...', 'success');
+      
+      // Auto-open YouTube after 1 second
+      setTimeout(() => {
+        chrome.tabs.create({ url: 'https://www.youtube.com' });
+        window.close(); // Close popup
+      }, 1000);
     } catch (error) {
       console.error('Error saving API key:', error);
       showStatus('Failed to save API key', 'error');

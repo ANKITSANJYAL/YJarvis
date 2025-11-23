@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YJarvis - AI Semantic Matching Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1400px;
+      margin: 20px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    h1 { 
+      color: #667eea; 
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+    
+    .subtitle { 
+      color: #666; 
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+
+    /* API Key Section */
+    .api-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .api-section h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    .api-input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .api-input-group input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .api-input-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .api-input-group button {
+      padding: 12px 25px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .api-input-group button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+    }
+
+    .api-status {
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .api-status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .api-status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .api-status.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+    
+    /* Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    
+    .section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .section h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+    }
+    
+    /* Video */
+    video {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Mic Button */
+    .mic-button {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #667eea;
+      color: white;
+      border: none;
+      font-size: 48px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .mic-button:hover {
+      background: #5568d3;
+      transform: scale(1.05);
+    }
+    
+    .mic-button.listening {
+      background: #ef4444;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      50% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+    }
+    
+    /* Control Buttons */
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .controls button {
+      padding: 12px;
+      border: none;
+      background: #667eea;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    .controls button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+    }
+
+    /* Voice Command Input */
+    .command-input-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      border: 2px dashed #667eea;
+    }
+
+    .command-input-section h4 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .command-input-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .command-input-group input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .command-input-group button {
+      padding: 10px 20px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .command-input-group button:hover {
+      background: #059669;
+    }
+    
+    /* Execution Log */
+    .execution-log {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      max-height: 500px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    .log-entry {
+      margin-bottom: 8px;
+      padding: 4px 8px;
+      border-radius: 3px;
+    }
+    
+    .log-entry.voice { color: #a78bfa; }
+    .log-entry.ai { color: #60a5fa; }
+    .log-entry.action { color: #34d399; }
+    .log-entry.player { color: #fbbf24; }
+    .log-entry.error { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+    .log-entry.success { color: #4ade80; background: rgba(74, 222, 128, 0.1); }
+
+    .log-timestamp {
+      color: #9ca3af;
+      margin-right: 8px;
+    }
+
+    /* Examples */
+    .examples {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .examples h4 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .example-commands {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .example-commands span {
+      padding: 6px 12px;
+      background: #e0e7ff;
+      color: #667eea;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .example-commands span:hover {
+      background: #667eea;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 YJarvis AI Integration Test</h1>
+    <p class="subtitle">Test AI-powered semantic command matching with natural language</p>
+
+    <!-- API Key Section -->
+    <div class="api-section">
+      <h3>🔑 OpenAI API Configuration</h3>
+      <div class="api-input-group">
+        <input 
+          type="password" 
+          id="apiKeyInput" 
+          placeholder="Enter your OpenAI API key (sk-...)"
+        />
+        <button onclick="saveApiKey()">💾 Save Key</button>
+        <button onclick="clearApiKey()" style="background: #ef4444;">🗑️ Clear</button>
+      </div>
+      <div id="apiStatus" class="api-status warning">
+        ⚠️ No API key set. AI semantic matching will use fallback patterns.
+      </div>
+    </div>
+
+    <div class="layout">
+      <!-- Left: Video Player -->
+      <div class="section">
+        <h2>🎬 Video Player</h2>
+        <video id="testVideo" controls>
+          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        </video>
+
+        <button class="mic-button" id="micButton" onclick="toggleVoice()">
+          🎤
+        </button>
+
+        <!-- Whistle Mode Toggle -->
+        <div style="text-align: center; margin: 15px 0;">
+          <button id="whistleButton" onclick="toggleWhistleMode()" style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+            🎵 Enable Whistle Mode
+          </button>
+          <p style="margin-top: 10px; color: #666; font-size: 14px;">
+            Enable for hands-free operation - just whistle to activate!
+          </p>
+        </div>
+
+        <!-- Manual Command Input -->
+        <div class="command-input-section">
+          <h4>💬 Type Command (or use voice)</h4>
+          <div class="command-input-group">
+            <input 
+              type="text" 
+              id="commandInput" 
+              placeholder="Type: 'take me back 30 seconds'" 
+              onkeypress="if(event.key==='Enter') testCommand()"
+            />
+            <button onclick="testCommand()">▶️ Test</button>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button onclick="testAction('play')">▶️ Play</button>
+          <button onclick="testAction('pause')">⏸️ Pause</button>
+          <button onclick="testAction('skip', 10)">⏩ Skip 10s</button>
+          <button onclick="testAction('rewind', 10)">⏪ Rewind 10s</button>
+          <button onclick="testAction('increaseSpeed')">⚡ Speed +</button>
+          <button onclick="testAction('decreaseSpeed')">🐌 Speed -</button>
+          <button onclick="testAction('increaseVolume')">🔊 Vol +</button>
+          <button onclick="testAction('decreaseVolume')">� Vol -</button>
+          <button onclick="testAction('mute')">🔇 Mute</button>
+        </div>
+
+        <!-- Examples -->
+        <div class="examples">
+          <h4>📝 Try These Natural Commands:</h4>
+          <div class="example-commands">
+            <span onclick="testTypedCommand('pause')">pause</span>
+            <span onclick="testTypedCommand('play')">play</span>
+            <span onclick="testTypedCommand('take me back 30 seconds')">take me back 30 seconds</span>
+            <span onclick="testTypedCommand('skip ahead 15 seconds')">skip ahead 15 seconds</span>
+            <span onclick="testTypedCommand('increase speed by 50%')">increase speed by 50%</span>
+            <span onclick="testTypedCommand('increase speed by 100%')">increase speed by 100%</span>
+            <span onclick="testTypedCommand('make it louder')">make it louder</span>
+            <span onclick="testTypedCommand('increase volume by 20')">increase volume by 20</span>
+            <span onclick="testTypedCommand('set volume to 50')">set volume to 50</span>
+            <span onclick="testTypedCommand('mute')">mute</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Execution Log -->
+      <div class="section">
+        <h2>📊 Execution Log</h2>
+        <div class="execution-log" id="executionLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============= OpenAI Client =============
+    class OpenAIClient {
+      constructor(apiKey) {
+        this.apiKey = apiKey;
+        this.baseURL = 'https://api.openai.com/v1';
+        this.model = 'gpt-4o-mini';
+      }
+
+      async semanticMatchCommand(command, availableActions) {
+        const startTime = performance.now();
+        
+        const actionsDescription = Object.entries(availableActions)
+          .map(([action, description]) => `- ${action}: ${description}`)
+          .join('\\n');
+
+        try {
+          const response = await fetch(`${this.baseURL}/chat/completions`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.apiKey}`
+            },
+            body: JSON.stringify({
+              model: this.model,
+              messages: [
+                {
+                  role: 'system',
+                  content: `You are a command interpreter for a YouTube video player. Your job is to understand natural language commands and map them to specific actions.
+
+Available actions:
+${actionsDescription}
+
+Analyze the user's command and return a JSON object with:
+- "action": the matching action name (or "query" if it's a question/conversation)
+- "param": extracted number if the action needs it. For time-based: seconds. For speed/volume: percentage or null for increment.
+- "confidence": how confident you are (0-1)
+
+Examples:
+"pause the video" → {"action": "pause", "param": null, "confidence": 0.95}
+"take me back 30 seconds" → {"action": "rewind", "param": 30, "confidence": 0.9}
+"skip ahead 10 seconds" → {"action": "skip", "param": 10, "confidence": 0.9}
+"increase speed by 50%" → {"action": "speedUp", "param": 50, "confidence": 0.9}
+"increase speed by 100%" → {"action": "speedUp", "param": 100, "confidence": 0.95}
+"speed up" → {"action": "speedUp", "param": null, "confidence": 0.9}
+"make it 2x faster" → {"action": "speedUp", "param": 100, "confidence": 0.9}
+"make it louder" → {"action": "increaseVolume", "param": null, "confidence": 0.85}
+"increase volume by 20" → {"action": "increaseVolume", "param": 20, "confidence": 0.9}
+"set volume to 50" → {"action": "setVolume", "param": 50, "confidence": 0.95}
+"decrease volume" → {"action": "decreaseVolume", "param": null, "confidence": 0.85}
+"what is this video about?" → {"action": "query", "param": null, "confidence": 0.95}
+
+Be flexible with phrasing but confident in your interpretation. Return ONLY valid JSON.`
+                },
+                {
+                  role: 'user',
+                  content: command
+                }
+              ],
+              temperature: 0.1,  // Lower for faster, more deterministic responses
+              max_tokens: 50,     // Reduced for faster response
+              response_format: { type: "json_object" }
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          const result = JSON.parse(data.choices[0].message.content);
+          
+          const duration = performance.now() - startTime;
+          log(`🤖 AI matched in ${duration.toFixed(0)}ms: ${JSON.stringify(result)}`, 'ai');
+          
+          return result;
+        } catch (error) {
+          log(`❌ AI error: ${error.message}`, 'error');
+          throw error;
+        }
+      }
+    }
+
+    // ============= Player Controller =============
+    class PlayerController {
+      constructor(videoElement) {
+        this.video = videoElement;
+      }
+
+      play() {
+        log(`▶️ PlayerController.play() - paused: ${this.video.paused}`, 'player');
+        this.video.play();
+        log('✅ Video playing', 'success');
+      }
+
+      pause() {
+        log(`⏸️ PlayerController.pause() - paused: ${this.video.paused}`, 'player');
+        this.video.pause();
+        log('✅ Video paused', 'success');
+      }
+
+      skip(seconds) {
+        log(`⏩ PlayerController.skip(${seconds})`, 'player');
+        this.video.currentTime += seconds;
+        log(`✅ Skipped ${seconds}s to ${this.video.currentTime.toFixed(1)}s`, 'success');
+      }
+
+      rewind(seconds) {
+        log(`⏪ PlayerController.rewind(${seconds})`, 'player');
+        this.video.currentTime -= seconds;
+        log(`✅ Rewound ${seconds}s to ${this.video.currentTime.toFixed(1)}s`, 'success');
+      }
+
+      seek(seconds) {
+        log(`⏭️ PlayerController.seek(${seconds})`, 'player');
+        this.video.currentTime = seconds;
+        log(`✅ Seeked to ${seconds}s`, 'success');
+      }
+
+      setSpeed(percentage) {
+        // percentage = null means increment by 25%
+        // percentage = 50 means set to 1.5x
+        // percentage = 100 means set to 2x
+        const current = this.video.playbackRate;
+        
+        if (percentage === null) {
+          // Smart increment: 1 → 1.25 → 1.5 → 1.75 → 2
+          const newSpeed = Math.min(2.0, current + 0.25);
+          log(`⚡ PlayerController.setSpeed() - incrementing from ${current}x to ${newSpeed}x`, 'player');
+          this.video.playbackRate = newSpeed;
+          log(`✅ Speed: ${newSpeed}x`, 'success');
+        } else {
+          // Set to specific speed based on percentage
+          const targetSpeed = 1 + (percentage / 100);
+          const clampedSpeed = Math.min(2.0, Math.max(0.25, targetSpeed));
+          log(`⚡ PlayerController.setSpeed(${percentage}%) - ${current}x → ${clampedSpeed}x`, 'player');
+          this.video.playbackRate = clampedSpeed;
+          log(`✅ Speed: ${clampedSpeed}x`, 'success');
+        }
+      }
+
+      increaseSpeed(percentage = null) {
+        this.setSpeed(percentage);
+      }
+
+      decreaseSpeed(percentage = null) {
+        const current = this.video.playbackRate;
+        
+        if (percentage === null) {
+          // Smart decrement: 2 → 1.75 → 1.5 → 1.25 → 1 → 0.75 → 0.5
+          const newSpeed = Math.max(0.25, current - 0.25);
+          log(`🐌 PlayerController.decreaseSpeed() - decrementing from ${current}x to ${newSpeed}x`, 'player');
+          this.video.playbackRate = newSpeed;
+          log(`✅ Speed: ${newSpeed}x`, 'success');
+        } else {
+          // Decrease by percentage
+          const targetSpeed = current - (percentage / 100);
+          const clampedSpeed = Math.min(2.0, Math.max(0.25, targetSpeed));
+          log(`🐌 PlayerController.decreaseSpeed(${percentage}%) - ${current}x → ${clampedSpeed}x`, 'player');
+          this.video.playbackRate = clampedSpeed;
+          log(`✅ Speed: ${clampedSpeed}x`, 'success');
+        }
+      }
+
+      normalSpeed() {
+        log(`🔄 PlayerController.normalSpeed()`, 'player');
+        this.video.playbackRate = 1.0;
+        log(`✅ Speed: 1x`, 'success');
+      }
+
+      setVolume(level) {
+        // level = null means increment by 10%
+        // level = 50 means set to 50%
+        // level = 100 means set to 100%
+        const current = Math.round(this.video.volume * 100);
+        
+        if (level === null) {
+          // Smart increment by 10%
+          const newVolume = Math.min(100, current + 10);
+          log(`� PlayerController.setVolume() - incrementing from ${current}% to ${newVolume}%`, 'player');
+          this.video.volume = newVolume / 100;
+          log(`✅ Volume: ${newVolume}%`, 'success');
+        } else {
+          // Set to specific level
+          const clampedLevel = Math.min(100, Math.max(0, level));
+          log(`🔊 PlayerController.setVolume(${level}%) - ${current}% → ${clampedLevel}%`, 'player');
+          this.video.volume = clampedLevel / 100;
+          log(`✅ Volume: ${clampedLevel}%`, 'success');
+        }
+      }
+
+      increaseVolume(amount = null) {
+        const current = Math.round(this.video.volume * 100);
+        const increment = amount || 10;
+        const newVolume = Math.min(100, current + increment);
+        log(`🔊 PlayerController.increaseVolume(${increment}) - ${current}% → ${newVolume}%`, 'player');
+        this.video.volume = newVolume / 100;
+        log(`✅ Volume: ${newVolume}%`, 'success');
+      }
+
+      decreaseVolume(amount = null) {
+        const current = Math.round(this.video.volume * 100);
+        const decrement = amount || 10;
+        const newVolume = Math.max(0, current - decrement);
+        log(`🔉 PlayerController.decreaseVolume(${decrement}) - ${current}% → ${newVolume}%`, 'player');
+        this.video.volume = newVolume / 100;
+        log(`✅ Volume: ${newVolume}%`, 'success');
+      }
+
+      mute() {
+        log(`🔇 PlayerController.mute()`, 'player');
+        this.video.muted = true;
+        log('✅ Muted', 'success');
+      }
+
+      unmute() {
+        log(`🔊 PlayerController.unmute()`, 'player');
+        this.video.muted = false;
+        log('✅ Unmuted', 'success');
+      }
+    }
+
+    // ============= Command Processor =============
+    class CommandProcessor {
+      constructor(playerController, openAIClient) {
+        this.playerController = playerController;
+        this.openAIClient = openAIClient;
+        
+        // Cache for AI responses to reduce latency
+        this.commandCache = new Map();
+        this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
+        
+        this.availableActions = {
+          play: 'Start or resume video playback',
+          pause: 'Pause the video',
+          skip: 'Skip forward by X seconds (extract number from command)',
+          rewind: 'Go backward by X seconds (extract number from command)',
+          seek: 'Go to specific timestamp in seconds',
+          speedUp: 'Increase playback speed (param: percentage increase or null for 25% increment)',
+          slowDown: 'Decrease playback speed (param: percentage decrease or null for 25% decrement)',
+          normalSpeed: 'Reset playback speed to 1x',
+          setVolume: 'Set volume to specific level (param: 0-100)',
+          increaseVolume: 'Increase volume (param: amount or null for 10% increment)',
+          decreaseVolume: 'Decrease volume (param: amount or null for 10% decrement)',
+          mute: 'Mute the audio',
+          unmute: 'Unmute the audio',
+          summarize: 'Generate AI summary of video transcript',
+          quiz: 'Generate quiz questions from video content'
+        };
+      }
+
+      async process(command) {
+        log(`🧠 Processing command: "${command}"`, 'voice');
+
+        const match = await this.semanticMatchCommand(command);
+
+        if (match && match.action !== 'query') {
+          log(`✅ Matched action: ${match.action}${match.param ? ` (${match.param})` : ''} [confidence: ${match.confidence}]`, 'ai');
+          return await this.executeAction(match);
+        }
+
+        log('💭 No action match - would treat as AI query', 'ai');
+        return { success: false, message: 'No action matched' };
+      }
+
+      async semanticMatchCommand(command) {
+        // Normalize command for cache lookup
+        const normalizedCommand = command.toLowerCase().trim();
+        
+        // Check cache first for instant response
+        if (this.commandCache.has(normalizedCommand)) {
+          const cached = this.commandCache.get(normalizedCommand);
+          if (Date.now() - cached.timestamp < this.cacheTimeout) {
+            log(`⚡ Cache hit! Instant match: ${cached.match.action}`, 'ai');
+            return cached.match;
+          } else {
+            this.commandCache.delete(normalizedCommand);
+          }
+        }
+        
+        if (this.openAIClient) {
+          try {
+            log('🤖 Using AI semantic matching...', 'ai');
+            
+            // Try fallback first for instant common commands
+            const fallback = this.fastFallbackCheck(normalizedCommand);
+            if (fallback && fallback.confidence > 0.85) {
+              log('⚡ Fast fallback matched instantly!', 'ai');
+              return fallback;
+            }
+            
+            // If not a common command, use AI
+            const aiMatch = await this.openAIClient.semanticMatchCommand(command, this.availableActions);
+            
+            // Cache the result
+            this.commandCache.set(normalizedCommand, {
+              match: aiMatch,
+              timestamp: Date.now()
+            });
+            
+            return aiMatch;
+          } catch (error) {
+            log('⚠️ AI failed, using fallback...', 'error');
+            return this.fallbackPatternMatch(normalizedCommand);
+          }
+        } else {
+          log('🔧 No API key, using fallback patterns...', 'ai');
+          return this.fallbackPatternMatch(normalizedCommand);
+        }
+      }
+
+      fastFallbackCheck(normalized) {
+        // Ultra-fast exact matches for common commands
+        const exactMatches = {
+          'play': { action: 'play', param: null, confidence: 1.0 },
+          'pause': { action: 'pause', param: null, confidence: 1.0 },
+          'stop': { action: 'pause', param: null, confidence: 0.95 },
+          'mute': { action: 'mute', param: null, confidence: 1.0 },
+          'unmute': { action: 'unmute', param: null, confidence: 1.0 },
+        };
+        
+        if (exactMatches[normalized]) {
+          return exactMatches[normalized];
+        }
+        
+        // Quick regex for very common patterns
+        if (/^(play|resume|start)$/.test(normalized)) {
+          return { action: 'play', param: null, confidence: 0.95 };
+        }
+        if (/^(pause|stop)$/.test(normalized)) {
+          return { action: 'pause', param: null, confidence: 0.95 };
+        }
+        
+        return null;
+      }
+
+      fallbackPatternMatch(command) {
+        const normalized = command.toLowerCase().trim();
+        const numberMatch = normalized.match(/(\\d+)/);
+        const number = numberMatch ? parseInt(numberMatch[1]) : null;
+        
+        if (/\\b(play|resume|start|continue)\\b/.test(normalized)) {
+          return { action: 'play', param: null, confidence: 0.9 };
+        }
+        if (/\\b(pause|stop|wait|hold)\\b/.test(normalized)) {
+          return { action: 'pause', param: null, confidence: 0.9 };
+        }
+        if (/\\b(skip|forward|ahead)\\b/.test(normalized) && number) {
+          return { action: 'skip', param: number, confidence: 0.85 };
+        }
+        if (/\\b(rewind|back|backward)\\b/.test(normalized) && number) {
+          return { action: 'rewind', param: number, confidence: 0.85 };
+        }
+        if (/\\b(speed up|faster)\\b/.test(normalized)) {
+          return { action: 'speedUp', param: null, confidence: 0.85 };
+        }
+        if (/\\b(slow down|slower)\\b/.test(normalized)) {
+          return { action: 'slowDown', param: null, confidence: 0.85 };
+        }
+        
+        return { action: 'query', param: null, confidence: 0.5 };
+      }
+
+      async executeAction(match) {
+        const { action, param } = match;
+        log(`🎯 Executing: ${action}${param ? `(${param})` : ''}`, 'action');
+
+        try {
+          switch (action) {
+            case 'play': 
+              this.playerController.play(); 
+              break;
+            case 'pause': 
+              this.playerController.pause(); 
+              break;
+            case 'skip': 
+              this.playerController.skip(parseInt(param)); 
+              break;
+            case 'rewind': 
+              this.playerController.rewind(parseInt(param)); 
+              break;
+            case 'seek': 
+              this.playerController.seek(parseInt(param)); 
+              break;
+            case 'speedUp': 
+              this.playerController.increaseSpeed(param ? parseInt(param) : null); 
+              break;
+            case 'slowDown': 
+              this.playerController.decreaseSpeed(param ? parseInt(param) : null); 
+              break;
+            case 'normalSpeed': 
+              this.playerController.normalSpeed(); 
+              break;
+            case 'setVolume': 
+              this.playerController.setVolume(parseInt(param)); 
+              break;
+            case 'increaseVolume': 
+              this.playerController.increaseVolume(param ? parseInt(param) : null); 
+              break;
+            case 'decreaseVolume': 
+              this.playerController.decreaseVolume(param ? parseInt(param) : null); 
+              break;
+            case 'mute': 
+              this.playerController.mute(); 
+              break;
+            case 'unmute': 
+              this.playerController.unmute(); 
+              break;
+            default:
+              log(`⚠️ Unknown action: ${action}`, 'error');
+              return { success: false };
+          }
+          return { success: true };
+        } catch (error) {
+          log(`❌ Error executing ${action}: ${error.message}`, 'error');
+          return { success: false, error: error.message };
+        }
+      }
+    }
+
+    // ============= Whistle Detector =============
+    class WhistleDetector {
+      constructor(onWhistleDetected) {
+        this.onWhistleDetected = onWhistleDetected;
+        this.isListening = false;
+        this.audioContext = null;
+        this.analyser = null;
+        this.microphone = null;
+        this.rafId = null;
+        
+        // Whistle detection parameters
+        this.whistleFrequencyMin = 1800; // Hz (typical whistle range)
+        this.whistleFrequencyMax = 3500; // Hz
+        this.whistleThreshold = 0.7; // Detection sensitivity (0-1)
+        this.whistleDuration = 200; // ms - how long whistle must be sustained
+        this.whistleStartTime = null;
+      }
+
+      async start() {
+        if (this.isListening) return;
+        
+        try {
+          // Request microphone access
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: false
+            } 
+          });
+          
+          // Setup audio analysis
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          this.analyser = this.audioContext.createAnalyser();
+          this.analyser.fftSize = 2048;
+          this.analyser.smoothingTimeConstant = 0.8;
+          
+          this.microphone = this.audioContext.createMediaStreamSource(stream);
+          this.microphone.connect(this.analyser);
+          
+          this.isListening = true;
+          this.detectWhistle();
+          
+          log('👂 Whistle detection active - whistle to activate voice!', 'success');
+        } catch (error) {
+          log(`❌ Microphone access denied: ${error.message}`, 'error');
+          log('💡 Click the mic button manually to use voice commands', 'ai');
+        }
+      }
+
+      stop() {
+        if (!this.isListening) return;
+        
+        this.isListening = false;
+        
+        if (this.rafId) {
+          cancelAnimationFrame(this.rafId);
+        }
+        
+        if (this.microphone) {
+          this.microphone.disconnect();
+        }
+        
+        if (this.audioContext) {
+          this.audioContext.close();
+        }
+        
+        log('👂 Whistle detection stopped', 'ai');
+      }
+
+      detectWhistle() {
+        if (!this.isListening) return;
+        
+        const bufferLength = this.analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        this.analyser.getByteFrequencyData(dataArray);
+        
+        // Convert frequency bins to Hz
+        const sampleRate = this.audioContext.sampleRate;
+        const binSize = sampleRate / this.analyser.fftSize;
+        
+        // Find peak in whistle frequency range
+        let maxAmplitude = 0;
+        let peakFrequency = 0;
+        
+        const minBin = Math.floor(this.whistleFrequencyMin / binSize);
+        const maxBin = Math.floor(this.whistleFrequencyMax / binSize);
+        
+        for (let i = minBin; i < maxBin && i < bufferLength; i++) {
+          if (dataArray[i] > maxAmplitude) {
+            maxAmplitude = dataArray[i];
+            peakFrequency = i * binSize;
+          }
+        }
+        
+        // Normalize amplitude (0-1)
+        const normalizedAmplitude = maxAmplitude / 255;
+        
+        // Check if we detected a whistle
+        if (normalizedAmplitude > this.whistleThreshold && 
+            peakFrequency >= this.whistleFrequencyMin && 
+            peakFrequency <= this.whistleFrequencyMax) {
+          
+          if (!this.whistleStartTime) {
+            this.whistleStartTime = Date.now();
+          } else {
+            const duration = Date.now() - this.whistleStartTime;
+            if (duration >= this.whistleDuration) {
+              log(`🎵 Whistle detected! (${Math.round(peakFrequency)}Hz) Activating voice...`, 'success');
+              this.whistleStartTime = null;
+              this.onWhistleDetected();
+              
+              // Pause detection briefly to avoid re-triggering
+              setTimeout(() => {
+                this.whistleStartTime = null;
+              }, 2000);
+            }
+          }
+        } else {
+          this.whistleStartTime = null;
+        }
+        
+        // Continue detection
+        this.rafId = requestAnimationFrame(() => this.detectWhistle());
+      }
+    }
+
+    // ============= Voice Controller =============
+    class VoiceController {
+      constructor(onCommand) {
+        this.onCommand = onCommand;
+        this.isListening = false;
+        this.autoStopTimeout = null;
+        
+        if (!('webkitSpeechRecognition' in window)) {
+          log('❌ Speech recognition not supported', 'error');
+          return;
+        }
+
+        this.recognition = new webkitSpeechRecognition();
+        this.recognition.continuous = false;
+        this.recognition.interimResults = false;
+        this.recognition.lang = 'en-US';
+
+        this.recognition.onresult = (event) => {
+          const command = event.results[0][0].transcript;
+          log(`🎤 Voice captured: "${command}"`, 'voice');
+          this.onCommand(command);
+        };
+
+        this.recognition.onerror = (event) => {
+          log(`❌ Voice error: ${event.error}`, 'error');
+          this.stop();
+        };
+
+        this.recognition.onend = () => {
+          this.stop();
+        };
+      }
+
+      start() {
+        if (!this.recognition) return;
+        if (this.isListening) return;
+        
+        this.isListening = true;
+        this.recognition.start();
+        log('🎤 Listening for command...', 'voice');
+        
+        // Auto-stop after 10 seconds if no speech detected
+        this.autoStopTimeout = setTimeout(() => {
+          if (this.isListening) {
+            log('⏱️ Timeout - no command detected', 'ai');
+            this.stop();
+          }
+        }, 10000);
+      }
+
+      stop() {
+        if (!this.recognition) return;
+        
+        if (this.autoStopTimeout) {
+          clearTimeout(this.autoStopTimeout);
+        }
+        
+        if (this.isListening) {
+          this.isListening = false;
+          this.recognition.stop();
+          log('🎤 Stopped listening', 'voice');
+        }
+      }
+    }
+
+    // ============= Main App =============
+    let openAIClient = null;
+    let playerController = null;
+    let commandProcessor = null;
+    let voiceController = null;
+    let whistleDetector = null;
+    let whistleMode = false;
+
+    function init() {
+      const video = document.getElementById('testVideo');
+      playerController = new PlayerController(video);
+      
+      // Load API key from localStorage
+      const savedKey = localStorage.getItem('openai_api_key');
+      if (savedKey) {
+        document.getElementById('apiKeyInput').value = savedKey;
+        openAIClient = new OpenAIClient(savedKey);
+        updateApiStatus(true);
+      }
+      
+      commandProcessor = new CommandProcessor(playerController, openAIClient);
+      voiceController = new VoiceController((command) => {
+        commandProcessor.process(command);
+      });
+
+      // Initialize whistle detector
+      whistleDetector = new WhistleDetector(() => {
+        // When whistle detected, start voice recognition
+        const button = document.getElementById('micButton');
+        button.classList.add('listening');
+        voiceController.start();
+        
+        // Auto-remove listening class when done
+        setTimeout(() => {
+          button.classList.remove('listening');
+        }, 10000);
+      });
+
+      log('✅ YJarvis initialized', 'success');
+      log('💡 Click "Enable Whistle Mode" to go completely hands-free!', 'ai');
+    }
+
+    function saveApiKey() {
+      const apiKey = document.getElementById('apiKeyInput').value.trim();
+      if (!apiKey) {
+        updateApiStatus(false, 'Please enter an API key');
+        return;
+      }
+      
+      if (!apiKey.startsWith('sk-')) {
+        updateApiStatus(false, 'Invalid API key format (should start with sk-)');
+        return;
+      }
+
+      localStorage.setItem('openai_api_key', apiKey);
+      openAIClient = new OpenAIClient(apiKey);
+      commandProcessor.openAIClient = openAIClient;
+      updateApiStatus(true);
+      log('🔑 API key saved and AI enabled', 'success');
+    }
+
+    function clearApiKey() {
+      localStorage.removeItem('openai_api_key');
+      document.getElementById('apiKeyInput').value = '';
+      openAIClient = null;
+      commandProcessor.openAIClient = null;
+      updateApiStatus(false, 'API key cleared. Using fallback patterns.');
+      log('🗑️ API key cleared', 'ai');
+    }
+
+    function updateApiStatus(success, message = '') {
+      const statusEl = document.getElementById('apiStatus');
+      if (success) {
+        statusEl.className = 'api-status success';
+        statusEl.textContent = '✅ API key configured! AI semantic matching enabled.';
+      } else {
+        statusEl.className = 'api-status ' + (message ? 'error' : 'warning');
+        statusEl.textContent = message || '⚠️ No API key set. AI semantic matching will use fallback patterns.';
+      }
+    }
+
+    function toggleVoice() {
+      const button = document.getElementById('micButton');
+      if (voiceController.isListening) {
+        voiceController.stop();
+        button.classList.remove('listening');
+      } else {
+        voiceController.start();
+        button.classList.add('listening');
+      }
+    }
+
+    function toggleWhistleMode() {
+      const button = document.getElementById('whistleButton');
+      whistleMode = !whistleMode;
+      
+      if (whistleMode) {
+        whistleDetector.start();
+        button.textContent = '🎵 Whistle Mode: ON';
+        button.style.background = '#10b981';
+        log('🎵 Whistle mode enabled! Just whistle to activate voice commands!', 'success');
+      } else {
+        whistleDetector.stop();
+        button.textContent = '🎵 Enable Whistle Mode';
+        button.style.background = '#667eea';
+        log('🎵 Whistle mode disabled', 'ai');
+      }
+    }
+
+    function testAction(action, param = null) {
+      commandProcessor.executeAction({ action, param });
+    }
+
+    async function testCommand() {
+      const command = document.getElementById('commandInput').value.trim();
+      if (!command) return;
+      
+      await commandProcessor.process(command);
+      document.getElementById('commandInput').value = '';
+    }
+
+    function testTypedCommand(command) {
+      document.getElementById('commandInput').value = command;
+      testCommand();
+    }
+
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('executionLog');
+      const timestamp = new Date().toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        fractionalSecondDigits: 3
+      });
+      
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.innerHTML = `<span class="log-timestamp">[${timestamp}]</span>${message}`;
+      
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // Initialize on load
+    window.onload = init;
+  </script>
+</body>
+</html>

@@ -19,57 +19,49 @@ export class VoiceController {
 
     this.recognition = new SpeechRecognition();
     
-    // Configuration for optimal performance
-    this.recognition.continuous = true; // Keep listening
-    this.recognition.interimResults = false; // Only final results for speed
+    // Configuration for whistle-to-start, whistle-to-stop mode
+    this.recognition.continuous = true; // Continuous until second whistle
+    this.recognition.interimResults = true; // Show interim results
     this.recognition.lang = 'en-US';
-    this.recognition.maxAlternatives = 1; // Single best result for speed
+    this.recognition.maxAlternatives = 1;
+    
+    this.lastTranscript = '';
 
     // Event handlers
     this.recognition.onstart = () => {
-      console.log('[VoiceController] Started listening');
+      console.log('[VoiceController] ⏺️ Listening... (whistle again to stop & execute)');
       this.isListening = true;
     };
 
     this.recognition.onresult = (event) => {
+      // Get the latest transcript (interim or final)
       const lastResult = event.results[event.results.length - 1];
+      const transcript = lastResult[0].transcript.trim();
+      
       if (lastResult.isFinal) {
-        const command = lastResult[0].transcript.trim();
-        console.log('[VoiceController] Recognized:', command);
-        
-        // Call callback with command
-        if (this.onCommandCallback) {
-          this.onCommandCallback(command);
-        }
+        console.log('[VoiceController] 📝 Final:', transcript);
+        this.lastTranscript = transcript;
+      } else {
+        console.log('[VoiceController] 📝 Interim:', transcript);
+        this.lastTranscript = transcript;
+      }
+      
+      // Update UI with current transcript
+      if (this.onInterimCallback) {
+        this.onInterimCallback(transcript);
       }
     };
 
     this.recognition.onerror = (event) => {
-      console.error('[VoiceController] Error:', event.error);
-      
-      // Auto-restart on some errors
-      if (event.error === 'no-speech' || event.error === 'audio-capture') {
-        console.log('[VoiceController] Auto-restarting...');
-        setTimeout(() => {
-          if (this.isListening) {
-            this.recognition.start();
-          }
-        }, 1000);
+      console.error('[VoiceController] ❌ Error:', event.error);
+      if (event.error !== 'no-speech') {
+        this.isListening = false;
       }
     };
 
     this.recognition.onend = () => {
-      console.log('[VoiceController] Stopped listening');
-      
-      // Auto-restart if still supposed to be listening
-      if (this.isListening) {
-        console.log('[VoiceController] Auto-restarting...');
-        try {
-          this.recognition.start();
-        } catch (error) {
-          console.error('[VoiceController] Restart failed:', error);
-        }
-      }
+      console.log('[VoiceController] ⏹️ Recognition ended');
+      this.isListening = false;
     };
 
     console.log('[VoiceController] Initialized');
@@ -108,6 +100,18 @@ export class VoiceController {
 
   isActive() {
     return this.isListening;
+  }
+  
+  setInterimCallback(callback) {
+    this.onInterimCallback = callback;
+  }
+  
+  getLastTranscript() {
+    return this.lastTranscript;
+  }
+  
+  clearTranscript() {
+    this.lastTranscript = '';
   }
 }
 

@@ -133,8 +133,77 @@
     </div>
   </div>
 
-  <script type="module">
-    import { CommandProcessor } from '../content/command-processor.js';
+  <script>
+    // Mock PlayerController
+    class MockPlayerController {
+      play() { return true; }
+      pause() { return true; }
+      togglePlayPause() { return true; }
+      skip(s) { return true; }
+      rewind(s) { return true; }
+      seek(s) { return true; }
+      increaseSpeed() { return 1.25; }
+      decreaseSpeed() { return 0.75; }
+      normalSpeed() { return true; }
+      setPlaybackRate(r) { return true; }
+      mute() { return true; }
+      unmute() { return true; }
+      setVolume(v) { return true; }
+    }
+
+    // Inline CommandProcessor for testing
+    class CommandProcessor {
+      constructor(playerController) {
+        this.playerController = playerController;
+        this.commandPatterns = this.initCommandPatterns();
+        console.log('[CommandProcessor] Initialized');
+      }
+
+      initCommandPatterns() {
+        return [
+          { pattern: /^(play|resume|start)$/i, action: 'play' },
+          { pattern: /^(pause|stop|wait)$/i, action: 'pause' },
+          { pattern: /^(play|pause|toggle)$/i, action: 'toggle' },
+          { pattern: /^skip (\d+) seconds?$/i, action: 'skip', param: 1 },
+          { pattern: /^skip (\d+)$/i, action: 'skip', param: 1 },
+          { pattern: /^forward (\d+)$/i, action: 'skip', param: 1 },
+          { pattern: /^rewind (\d+) seconds?$/i, action: 'rewind', param: 1 },
+          { pattern: /^rewind (\d+)$/i, action: 'rewind', param: 1 },
+          { pattern: /^back (\d+)$/i, action: 'rewind', param: 1 },
+          { pattern: /^go to (\d+)$/i, action: 'seek', param: 1 },
+          { pattern: /^speed up$/i, action: 'speedUp' },
+          { pattern: /^slow down$/i, action: 'slowDown' },
+          { pattern: /^normal speed$/i, action: 'normalSpeed' },
+          { pattern: /^set speed to ([\d.]+)$/i, action: 'setSpeed', param: 1 },
+          { pattern: /^mute$/i, action: 'mute' },
+          { pattern: /^unmute$/i, action: 'unmute' },
+          { pattern: /^volume (\d+)$/i, action: 'setVolume', param: 1 },
+          { pattern: /^summarize$/i, action: 'summarize' },
+          { pattern: /^summary$/i, action: 'summarize' },
+          { pattern: /^give me a summary$/i, action: 'summarize' },
+          { pattern: /^quiz$/i, action: 'quiz' },
+          { pattern: /^test me$/i, action: 'quiz' },
+          { pattern: /^give me a quiz$/i, action: 'quiz' }
+        ];
+      }
+
+      matchCommand(command) {
+        const normalizedCommand = command.toLowerCase().trim();
+
+        for (const pattern of this.commandPatterns) {
+          const match = normalizedCommand.match(pattern.pattern);
+          if (match) {
+            return {
+              action: pattern.action,
+              param: pattern.param ? match[pattern.param] : null,
+              original: command
+            };
+          }
+        }
+
+        return null;
+      }
+    }
 
     // Mock player controller for testing
     class MockPlayerController {

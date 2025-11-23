@@ -40,22 +40,43 @@ export class PlayerController {
   }
 
   seek(seconds) {
-    this.video.currentTime = Math.max(0, Math.min(seconds, this.video.duration));
-    console.log('[PlayerController] Seek to', seconds);
+    // Check if video is ready and duration is valid
+    if (!this.video || isNaN(this.video.duration) || !isFinite(this.video.duration)) {
+      console.warn('[PlayerController] Video not ready or invalid duration');
+      return false;
+    }
+    
+    const targetTime = Math.max(0, Math.min(seconds, this.video.duration));
+    if (!isFinite(targetTime)) {
+      console.error('[PlayerController] Invalid target time:', targetTime);
+      return false;
+    }
+    
+    this.video.currentTime = targetTime;
+    console.log('[PlayerController] Seek to', targetTime);
     return true;
   }
 
   skip(seconds) {
+    if (!this.video || isNaN(this.video.currentTime)) {
+      console.warn('[PlayerController] Video not ready for skip');
+      return false;
+    }
+    
     const newTime = this.video.currentTime + seconds;
-    this.seek(newTime);
-    console.log('[PlayerController] Skip', seconds);
-    return true;
+    const result = this.seek(newTime);
+    if (result) {
+      console.log('[PlayerController] Skip', seconds);
+    }
+    return result;
   }
 
   rewind(seconds) {
-    this.skip(-seconds);
-    console.log('[PlayerController] Rewind', seconds);
-    return true;
+    const result = this.skip(-seconds);
+    if (result) {
+      console.log('[PlayerController] Rewind', seconds);
+    }
+    return result;
   }
 
   // Speed controls

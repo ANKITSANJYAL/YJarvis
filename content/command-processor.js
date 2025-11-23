@@ -39,7 +39,13 @@ export class CommandProcessor {
       { pattern: /^give me a summary$/i, action: 'summarize' },
       { pattern: /^quiz$/i, action: 'quiz' },
       { pattern: /^test me$/i, action: 'quiz' },
-      { pattern: /^give me a quiz$/i, action: 'quiz' }
+      { pattern: /^give me a quiz$/i, action: 'quiz' },
+      
+      // Search/Play patterns - intelligent agent behavior
+      { pattern: /^play\s+(?:a\s+)?video\s+(?:on|about)\s+(.+)$/i, action: 'searchAndPlay', param: 1 },
+      { pattern: /^show\s+me\s+(?:a\s+)?video\s+(?:on|about)\s+(.+)$/i, action: 'searchAndPlay', param: 1 },
+      { pattern: /^find\s+(?:a\s+)?video\s+(?:on|about)\s+(.+)$/i, action: 'searchAndPlay', param: 1 },
+      { pattern: /^search\s+(?:for\s+)?(.+)$/i, action: 'searchAndPlay', param: 1 }
     ];
   }
 
@@ -150,6 +156,10 @@ export class CommandProcessor {
 
       case 'quiz':
         return await this.handleQuiz(transcript);
+      
+      // Intelligent search and play
+      case 'searchAndPlay':
+        return await this.handleSearchAndPlay(param);
 
       default:
         return { success: false, error: 'Unknown action' };
@@ -211,8 +221,84 @@ export class CommandProcessor {
     return response;
   }
 
+  async handleSearchAndPlay(searchQuery) {
+    console.log('[CommandProcessor] Intelligent search and play:', searchQuery);
+    
+    try {
+      // Navigate to YouTube search
+      const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`;
+      window.location.href = searchUrl;
+      
+      // Wait for search results to load
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Find and click the first video result
+      await this.clickFirstVideo();
+      
+      return { 
+        success: true, 
+        message: `Playing top result for: ${searchQuery}` 
+      };
+    } catch (error) {
+      console.error('[CommandProcessor] Search and play failed:', error);
+      return { 
+        success: false, 
+        error: `Could not find video for: ${searchQuery}` 
+      };
+    }
+  }
+  
+  async clickFirstVideo() {
+    return new Promise((resolve, reject) => {
+      const maxAttempts = 10;
+      let attempts = 0;
+      
+      const findAndClick = () => {
+        attempts++;
+        
+        // Try multiple selectors for video results
+        const selectors = [
+          'ytd-video-renderer a#video-title',
+          'ytd-video-renderer h3 a',
+          'a#video-title',
+          '.ytd-video-renderer a'
+        ];
+        
+        for (const selector of selectors) {
+          const videoLink = document.querySelector(selector);
+          if (videoLink && videoLink.href && videoLink.href.includes('/watch?v=')) {
+            console.log('[CommandProcessor] Found first video, navigating...');
+            videoLink.click();
+            resolve();
+            return;
+          }
+        }
+        
+        if (attempts >= maxAttempts) {
+          reject(new Error('Could not find video after ' + maxAttempts + ' attempts'));
+          return;
+        }
+        
+        // Try again after a short delay
+        setTimeout(findAndClick, 300);
+      };
+      
+      findAndClick();
+    });
+  }
+
   async handleAIQuery(command, transcript) {
     console.log('[CommandProcessor] AI query:', command);
+    
+    // Check if this might be a search request
+    const searchIndicators = ['video', 'play', 'show', 'find', 'watch'];
+    const lowerCommand = command.toLowerCase();
+    const mightBeSearch = searchIndicators.some(indicator => lowerCommand.includes(indicator));
+    
+    if (mightBeSearch && !window.location.pathname.includes('/watch')) {
+      // This looks like a search request, route to searchAndPlay
+      return await this.handleSearchAndPlay(command);
+    }
     
     const response = await chrome.runtime.sendMessage({
       type: 'PROCESS_COMMAND',

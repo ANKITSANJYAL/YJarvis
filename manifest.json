@@ -13,14 +13,13 @@
     "https://api.openai.com/*"
   ],
   "background": {
-    "service_worker": "background/service-worker.js",
-    "type": "module"
+    "service_worker": "background/service-worker-bundled.js"
   },
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["content/content-script.js"],
-      "run_at": "document_idle"
+      "js": ["content/content-script-bundled.js"],
+      "run_at": "document_end"
     }
   ],
   "action": {
