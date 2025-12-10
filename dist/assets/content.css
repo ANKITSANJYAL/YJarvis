@@ -1,0 +1,1 @@
+.jarvis-indicator{position:fixed;bottom:16px;right:16px;width:12px;height:12px;border-radius:50%;background:#10b981;box-shadow:0 0 #10b981b3;animation:pulse 2s infinite;z-index:2147483647}@keyframes pulse{0%{box-shadow:0 0 #10b981b3}70%{box-shadow:0 0 0 10px #10b98100}to{box-shadow:0 0 #10b98100}}

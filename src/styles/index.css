@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* High-contrast mode support placeholder classes */
+.hc { color: #000; background: #fff; }

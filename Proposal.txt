@@ -1,0 +1,631 @@
+# JARVIS YouTube Assistant - Production-Grade Development Specification
+
+## Role & Standards
+You are a **Senior AI Engineer at Google** building a production-ready Chrome extension. Follow these non-negotiable standards:
+
+### Code Quality Standards
+- **Google TypeScript Style Guide** compliance
+- **Zero tolerance** for placeholder code, TODOs, or "// implement this later"
+- **Comprehensive error handling** with proper try-catch, fallbacks, and user feedback
+- **Production logging** with different levels (error, warn, info, debug)
+- **Type safety**: Full TypeScript with strict mode, no `any` types
+- **Performance**: Debouncing, throttling, lazy loading, memory management
+- **Security**: Input sanitization, API key encryption, CSP compliance
+- **Testing**: Unit tests for critical functions, integration tests for APIs
+- **Documentation**: JSDoc comments for all public functions, inline comments for complex logic
+
+### Architecture Principles
+- **Separation of Concerns**: Clear module boundaries, single responsibility
+- **Dependency Injection**: Testable, mockable dependencies
+- **Event-Driven Architecture**: Proper pub-sub patterns for extension messaging
+- **State Management**: Centralized state with immutability
+- **Error Boundaries**: Graceful degradation, never crash the extension
+- **Offline Capability**: Cache management, queue failed requests
+
+---
+
+## PROJECT SPECIFICATION
+
+### Overview
+Build a production-grade Chrome extension that provides an AI-powered voice assistant for YouTube, modeled after Tony Stark's JARVIS. The assistant enables hands-free video control, intelligent search, automated learning tools (summaries, flashcards, quizzes), and natural conversation.
+
+### Core Features
+
+#### 1. Voice Interface & Wake Word Detection
+- **Wake Words**: "Jarvis" or "Dummy"
+- **Continuous Listening**: Low-power background listening with visual indicator
+- **Voice Recognition**: Web Speech API with fallback handling
+- **Text-to-Speech**: Natural-sounding responses with personality
+- **Voice Activity Detection**: Smart pause/resume based on user speech patterns
+- **Noise Cancellation**: Basic filtering for better recognition accuracy
+
+**Personality Traits for Jarvis:**
+- Witty and sophisticated like the MCU character
+- Brief, punchy responses (1-2 sentences for voice output)
+- Occasional humor and playful remarks
+- Professional but personable tone
+- Example activation responses:
+  - "At your service, sir."
+  - "I've been expecting you."
+  - "Jarvis online and ready to assist."
+  - "All systems operational, awaiting your command."
+
+#### 2. YouTube Control Commands
+Must support ALL of the following voice commands with natural language variations:
+
+**Playback Control:**
+- Play, pause, resume
+- Stop (pause + seek to start)
+- Restart/replay from beginning
+
+**Navigation:**
+- Skip forward/backward by X seconds (support: 5, 10, 15, 30, 60 seconds)
+- Go to timestamp (e.g., "go to 2 minutes 30 seconds")
+- Jump to percentage (e.g., "go to 50% of the video")
+- Next/previous video in playlist
+
+**Audio Control:**
+- Increase/decrease volume by X% or by increments
+- Mute/unmute
+- Set volume to specific level (e.g., "set volume to 50%")
+
+**Playback Settings:**
+- Change playback speed (0.25x to 2x)
+- Toggle captions/subtitles
+- Switch video quality
+- Enter/exit fullscreen
+- Enter/exit theater mode
+
+**Search & Discovery:**
+- "Search for [topic]" - Opens search, finds best matching video
+- "Play the most popular video on [topic]"
+- "Find a tutorial on [topic]"
+- "Show me videos about [topic] from [channel]"
+
+#### 3. Intelligent Video Search
+- **YouTube Data API v3 Integration**: Search with proper ranking
+- **Best Video Selection Algorithm**:
+  - Combine view count, like ratio, recency, channel authority
+  - Filter out clickbait based on title/description analysis
+  - Prefer educational content for learning queries
+  - Weight factors based on query intent (entertainment vs learning)
+- **Search Result Caching**: 1-hour cache to reduce API calls
+- **Quota Management**: Track and display API quota usage
+
+#### 4. Transcript & Summarization
+- **Transcript Extraction**:
+  - Primary: YouTube official captions API
+  - Fallback: youtube-transcript-api library
+  - Handle multiple languages
+  - Timestamp preservation
+- **AI Summarization**:
+  - GPT-4 powered with custom prompts
+  - Multiple summary levels: brief (2-3 sentences), standard (paragraph), detailed (bullet points)
+  - Key concepts extraction
+  - Timestamp-linked highlights
+- **Flashcard Generation**:
+  - Spaced repetition algorithm (SM-2)
+  - Front: Question/concept, Back: Answer/explanation
+  - Difficulty rating
+  - Image extraction from video frames where relevant
+  - Export to Anki format
+
+#### 5. Quiz System
+- **Question Generation**:
+  - Mix of MCQ (60%) and short-answer (40%)
+  - Difficulty scaling based on video length and complexity
+  - 5 questions for <10 min videos, 10 questions for 10-30 min, 15+ for longer
+- **Answer Input Modes**:
+  - Voice input with confirmation
+  - Click-to-type with keyboard shortcuts
+  - Mode selection via voice: "I'll type" or "I'll speak"
+- **Evaluation**:
+  - GPT-4 powered grading for explanatory answers
+  - Immediate feedback with explanations
+  - Score tracking and analytics
+- **Adaptive Learning**:
+  - Track weak areas
+  - Generate follow-up questions
+  - Suggest related videos for improvement
+
+#### 6. User Experience Requirements
+- **Onboarding Flow**:
+  - Clear setup wizard on first install
+  - API key input with validation
+  - Privacy policy and permissions explanation
+  - Interactive tutorial
+- **Visual Feedback**:
+  - Listening indicator (pulsing microphone icon)
+  - Processing state (thinking animation)
+  - Command confirmation (brief visual + audio)
+  - Error states with actionable messages
+- **Accessibility**:
+  - Keyboard shortcuts for all features
+  - Screen reader compatible
+  - High contrast mode support
+  - Font size customization
+- **Settings Panel**:
+  - Wake word customization
+  - Voice selection (male/female, accent)
+  - Speech rate adjustment
+  - Command sensitivity tuning
+  - API quota monitoring
+  - Privacy controls (recording history on/off)
+
+---
+
+## TECHNICAL ARCHITECTURE
+
+### Tech Stack (Non-negotiable)
+```
+Frontend:
+- TypeScript 5.3+ (strict mode)
+- React 18+ with hooks
+- Tailwind CSS 3.4+
+- Zustand (state management)
+- React Query (API caching)
+- Vite (build tool)
+
+APIs & Services:
+- Web Speech API (voice recognition)
+- Speech Synthesis API (TTS)
+- OpenAI API (GPT-4 Turbo)
+- YouTube Data API v3
+- YouTube IFrame Player API
+
+Browser APIs:
+- Chrome Extension APIs (Manifest V3)
+- IndexedDB (local storage)
+- Service Workers (background tasks)
+
+Quality Assurance:
+- Jest + React Testing Library
+- Playwright (E2E tests)
+- ESLint + Prettier
+- Husky (pre-commit hooks)
+```
+
+### Project Structure
+```
+jarvis-youtube-assistant/
+├── manifest.json                      # Manifest V3 configuration
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── .eslintrc.json
+├── .prettierrc
+├── src/
+│   ├── background/
+│   │   ├── index.ts                   # Service worker entry
+│   │   ├── apiKeyManager.ts           # Encrypted storage
+│   │   ├── quotaManager.ts            # API rate limiting
+│   │   └── messageRouter.ts           # Extension messaging
+│   ├── content/
+│   │   ├── index.ts                   # Content script entry
+│   │   ├── youtubeController.ts       # Video control
+│   │   ├── uiInjector.ts              # DOM manipulation
+│   │   └── transcriptExtractor.ts     # Caption fetching
+│   ├── popup/
+│   │   ├── index.tsx                  # React entry
+│   │   ├── App.tsx                    # Main component
+│   │   ├── pages/
+│   │   │   ├── Setup.tsx              # First-time setup
+│   │   │   ├── Dashboard.tsx          # Main interface
+│   │   │   ├── Settings.tsx           # Configuration
+│   │   │   └── Analytics.tsx          # Usage stats
+│   │   └── components/
+│   │       ├── FlashcardDeck.tsx
+│   │       ├── QuizInterface.tsx
+│   │       ├── VoiceVisualizer.tsx
+│   │       └── TranscriptViewer.tsx
+│   ├── services/
+│   │   ├── voiceService.ts            # Speech recognition/synthesis
+│   │   ├── aiService.ts               # OpenAI integration
+│   │   ├── youtubeService.ts          # YouTube APIs
+│   │   ├── cacheService.ts            # IndexedDB wrapper
+│   │   └── analyticsService.ts        # Usage tracking
+│   ├── utils/
+│   │   ├── commandParser.ts           # NLP for commands
+│   │   ├── videoAnalyzer.ts           # Best video selection
+│   │   ├── flashcardGenerator.ts      # SM-2 algorithm
+│   │   ├── quizGenerator.ts           # Question generation
+│   │   └── errorHandler.ts            # Centralized error handling
+│   ├── types/
+│   │   ├── index.d.ts                 # Global types
+│   │   ├── youtube.d.ts
+│   │   └── voice.d.ts
+│   ├── constants/
+│   │   ├── commands.ts                # Command mappings
+│   │   ├── prompts.ts                 # AI system prompts
+│   │   └── config.ts                  # App configuration
+│   └── hooks/
+│       ├── useVoiceRecognition.ts
+│       ├── useYouTubePlayer.ts
+│       ├── useAIAssistant.ts
+│       └── useFlashcards.ts
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+└── docs/
+    ├── ARCHITECTURE.md
+    ├── API_DOCUMENTATION.md
+    └── USER_GUIDE.md
+```
+
+### Critical Implementation Details
+
+#### 1. Voice Recognition Service
+```typescript
+// Requirements:
+- Wake word detection with configurable sensitivity
+- Continuous listening with automatic pause on silence
+- Command buffering with 2-second timeout
+- Confidence scoring (reject below 70%)
+- Language detection and multi-language support
+- Background noise filtering
+- Proper cleanup on tab close/navigate away
+```
+
+#### 2. AI Service (OpenAI Integration)
+```typescript
+// Requirements:
+- Streaming responses for real-time feedback
+- Context management (last 5 interactions)
+- Personality injection (Jarvis character)
+- Token counting and cost tracking
+- Retry logic with exponential backoff
+- Rate limiting (60 requests/minute)
+- Response caching for repeated queries
+- Separate prompts for: commands, summaries, flashcards, quiz generation
+```
+
+#### 3. YouTube Controller
+```typescript
+// Requirements:
+- Detect and adapt to YouTube UI changes
+- Handle YouTube Music separately
+- Support embedded players
+- Queue multiple commands (debounce 500ms)
+- Sync state with YouTube's native controls
+- Handle ads (pause Jarvis during ads)
+- Playlist navigation
+- Video quality auto-switching based on network
+```
+
+#### 4. Flashcard System
+```typescript
+// Requirements:
+- Spaced repetition algorithm (SM-2)
+- Card states: new, learning, review, mature
+- Review scheduling based on performance
+- Visual design with flip animation
+- Markdown support for formatting
+- Image embedding from video screenshots
+- Tag-based organization
+- Export to Anki, Quizlet formats
+- Statistics: retention rate, study time, difficult cards
+```
+
+#### 5. Quiz Generator
+```typescript
+// Requirements:
+- Question types: MCQ (4 options), true/false, short answer, fill-in-blank
+- Difficulty analysis using Bloom's Taxonomy
+- Distractor generation for MCQs (plausible wrong answers)
+- Answer key with explanations
+- Partial credit for short answers
+- Timer per question (optional)
+- Review mode to see all answers
+- Performance analytics with weak topic identification
+```
+
+---
+
+## SECURITY & PRIVACY
+
+### Security Requirements
+1. **API Key Storage**: 
+   - Encrypt using Web Crypto API
+   - Store in chrome.storage.local (never sync)
+   - Validate format before storage
+   - Clear on logout
+   - Never log or expose in errors
+
+2. **Content Security Policy**:
+   - No inline scripts
+   - Whitelist only required domains
+   - No eval() or similar
+
+3. **Input Sanitization**:
+   - Sanitize all user inputs
+   - Prevent injection attacks
+   - Validate YouTube URLs
+
+4. **Permissions**: Request minimum required:
+   - activeTab
+   - storage
+   - tabs (for YouTube detection only)
+   - No host permissions beyond YouTube
+
+### Privacy Requirements
+1. **Data Collection**:
+   - No telemetry by default
+   - Optional anonymous usage stats (opt-in)
+   - No voice recording storage
+   - No transcript storage (process and discard)
+
+2. **User Control**:
+   - Clear data export
+   - One-click data deletion
+   - Disable features individually
+   - Transparent about API calls
+
+---
+
+## PERFORMANCE REQUIREMENTS
+
+### Load Time
+- Extension popup: < 100ms
+- Content script injection: < 50ms
+- First voice command response: < 500ms
+- Video search and play: < 3 seconds
+
+### Resource Usage
+- Memory: < 50MB idle, < 150MB active
+- CPU: < 5% average
+- Network: Batch requests, use cache aggressively
+
+### Optimization Techniques
+- Code splitting for popup UI
+- Lazy load AI features
+- Debounce voice commands
+- Throttle YouTube API calls
+- IndexedDB for transcript cache
+- Service worker for background tasks
+- Web Workers for heavy computations
+
+---
+
+## ERROR HANDLING & RESILIENCE
+
+### Error Categories & Handling
+1. **API Errors** (OpenAI, YouTube):
+   - Retry with exponential backoff (3 attempts)
+   - Fallback to cached data
+   - User-friendly error messages
+   - Log for debugging (without sensitive data)
+
+2. **Voice Recognition Errors**:
+   - Auto-restart after failure
+   - Fallback to text input
+   - Notify user of low confidence
+
+3. **YouTube Player Errors**:
+   - Detect player state changes
+   - Re-initialize if needed
+   - Handle restricted/deleted videos
+
+4. **Network Errors**:
+   - Queue failed requests
+   - Retry on reconnection
+   - Offline mode with limited features
+
+### Logging Strategy
+```typescript
+// Log levels: ERROR, WARN, INFO, DEBUG
+// Production: ERROR, WARN only
+// Development: All levels
+// Include: timestamp, context, error stack (sanitized)
+// Store last 100 logs in memory for bug reports
+```
+
+---
+
+## TESTING REQUIREMENTS
+
+### Unit Tests (>80% coverage)
+- All utility functions
+- Command parser
+- State management
+- API wrappers
+
+### Integration Tests
+- Voice recognition flow
+- YouTube player control
+- AI response generation
+- Flashcard CRUD operations
+
+### E2E Tests
+- Complete user journey: install → setup → voice command → video plays
+- Quiz generation and completion
+- Flashcard review session
+- Settings modification
+
+### Test Scenarios
+- Normal operation
+- API key invalid/expired
+- Network offline
+- YouTube UI changes
+- Concurrent commands
+- Memory stress test (long session)
+
+---
+
+## DEPLOYMENT & MAINTENANCE
+
+### Build Process
+```bash
+npm run build              # Production build
+npm run build:dev          # Development build with source maps
+npm run test               # Run all tests
+npm run lint               # ESLint + Prettier
+npm run type-check         # TypeScript validation
+```
+
+### Release Checklist
+- [ ] All tests passing
+- [ ] No console errors/warnings
+- [ ] Lighthouse score: >90 performance, >95 accessibility
+- [ ] Chrome Web Store assets ready (screenshots, description)
+- [ ] Privacy policy published
+- [ ] Changelog updated
+- [ ] Version bump in manifest.json
+
+### Monitoring & Analytics
+- Error rate tracking
+- API quota usage alerts
+- User engagement metrics (opt-in)
+- Performance metrics (load times)
+- Feature usage statistics
+
+---
+
+## DELIVERABLES
+
+### Phase 1: Core Foundation (Week 1-2)
+- [ ] Extension scaffolding with TypeScript + React + Vite
+- [ ] Voice recognition with wake word detection
+- [ ] Basic YouTube player control (play, pause, seek, volume)
+- [ ] OpenAI integration with Jarvis personality
+- [ ] Settings page with API key management
+
+### Phase 2: Intelligent Search (Week 3)
+- [ ] YouTube Data API integration
+- [ ] Natural language search command parsing
+- [ ] Best video selection algorithm
+- [ ] Search result caching
+
+### Phase 3: Learning Tools (Week 4-5)
+- [ ] Transcript extraction (official + fallback)
+- [ ] AI-powered summarization with multiple levels
+- [ ] Flashcard generation with SM-2 algorithm
+- [ ] Flashcard review UI with statistics
+
+### Phase 4: Quiz System (Week 6)
+- [ ] Quiz question generation (MCQ + short answer)
+- [ ] Voice/type answer input
+- [ ] AI-powered grading
+- [ ] Performance analytics and weak area identification
+
+### Phase 5: Polish & Launch (Week 7-8)
+- [ ] Comprehensive error handling
+- [ ] Performance optimization
+- [ ] Accessibility improvements
+- [ ] Complete test suite
+- [ ] Documentation (user guide + developer docs)
+- [ ] Chrome Web Store submission
+
+---
+
+## CODE QUALITY GATES (Must Pass Before Committing)
+
+### Pre-commit Checks
+```bash
+1. ESLint: 0 errors, 0 warnings
+2. Prettier: All files formatted
+3. TypeScript: 0 type errors (strict mode)
+4. Tests: All passing, coverage >80%
+5. Build: Success without warnings
+```
+
+### Code Review Checklist
+- [ ] Follows Google TypeScript Style Guide
+- [ ] No console.log in production code
+- [ ] All functions have JSDoc comments
+- [ ] Error handling implemented
+- [ ] Performance considered (no blocking operations)
+- [ ] Security reviewed (no vulnerabilities)
+- [ ] Accessibility tested
+- [ ] Mobile-friendly (if applicable)
+
+---
+
+## EXAMPLES OF EXPECTED CODE QUALITY
+
+### Good Example - Command Parser
+```typescript
+/**
+ * Parses natural language voice commands into structured actions.
+ * Handles variations and ambiguity with confidence scoring.
+ */
+export class CommandParser {
+  private commandPatterns: Map<CommandType, RegExp[]>;
+  
+  constructor(private config: ParserConfig) {
+    this.initializePatterns();
+  }
+  
+  /**
+   * Parses a voice command transcript.
+   * @param transcript - Raw speech-to-text output
+   * @returns Parsed command with confidence score, or null if unparseable
+   */
+  parse(transcript: string): ParsedCommand | null {
+    try {
+      const normalized = this.normalize(transcript);
+      
+      for (const [type, patterns] of this.commandPatterns) {
+        for (const pattern of patterns) {
+          const match = normalized.match(pattern);
+          if (match) {
+            return this.buildCommand(type, match);
+          }
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      logger.error('Command parsing failed', { transcript, error });
+      throw new CommandParsingError('Failed to parse command', { cause: error });
+    }
+  }
+  
+  private normalize(text: string): string {
+    return text.toLowerCase().trim().replace(/[^\w\s]/g, '');
+  }
+  
+  private buildCommand(type: CommandType, match: RegExpMatchArray): ParsedCommand {
+    // Implementation with proper type safety and validation
+  }
+}
+```
+
+### Bad Example - DON'T DO THIS
+```typescript
+// ❌ No types, no error handling, no documentation
+function parseCommand(cmd) {
+  // TODO: implement this
+  return cmd.toLowerCase();
+}
+
+// ❌ Any types, no validation
+async function search(query: any): Promise<any> {
+  const results = await fetch(query);
+  return results.json();
+}
+```
+
+---
+
+## CRITICAL: WHAT THIS PROMPT EXPECTS
+
+You are expected to deliver **production-ready code** that:
+1. **Works flawlessly** on first run (no "it should work" code)
+2. **Handles all edge cases** (network errors, API failures, malformed input)
+3. **Is fully typed** (no `any`, proper interfaces/types for everything)
+4. **Has zero placeholders** (no TODOs, no "implement later" comments)
+5. **Is tested** (unit + integration tests for critical paths)
+6. **Is documented** (JSDoc for public APIs, inline comments for complex logic)
+7. **Follows style guides** (Google TypeScript standards, Prettier formatted)
+8. **Is secure** (input sanitization, encrypted storage, CSP compliant)
+9. **Is performant** (< 150MB memory, < 5% CPU, fast response times)
+10. **Is maintainable** (clean architecture, separation of concerns, DRY principle)
+
+If you cannot deliver production-grade code for any component, explicitly state why and what's needed to achieve production quality. Do not deliver placeholder or incomplete implementations.
+
+---
+
+## FINAL INSTRUCTION
+
+Build the Jarvis YouTube Assistant following every requirement in this specification. Write code as if it's going into the Chrome Web Store tomorrow and will be used by millions of users. No shortcuts, no placeholders, no excuses. Production-grade or nothing.

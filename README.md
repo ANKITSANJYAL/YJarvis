@@ -1,252 +1,110 @@
-# 🎤 YJarvis - AI Voice Assistant for YouTube
+# Jarvis YouTube Assistant
 
-> Transform your YouTube experience with voice control and AI-powered insights
+Production-grade MV3 Chrome extension that brings AI-powered voice control to YouTube, inspired by Tony Stark's JARVIS. Control YouTube hands-free, search for videos naturally, and generate learning tools like summaries, flashcards, and quizzes.
 
-## 🚀 Features
+## 🎯 Key Features
 
-- **Voice Control**: Hands-free YouTube navigation using natural speech
-- **AI Summaries**: Instant video summarization using GPT-4o-mini
-- **Interactive Quizzes**: Generate comprehension tests from video content
-- **Natural Voice Responses**: TTS feedback for seamless interaction
-- **Real-time Performance**: Optimized for <2s latency on all AI operations
+✅ **Voice Control**: "Jarvis, pause" - hands-free YouTube control with wake word detection  
+✅ **Smart Search**: Natural language video search with intelligent ranking  
+✅ **AI Summaries**: Brief, standard, or detailed summaries of any video  
+✅ **Flashcards**: Auto-generated with spaced repetition (SM-2 algorithm)  
+✅ **Quizzes**: AI-generated questions with auto-grading  
+✅ **Complete Playback Control**: Speed, volume, seeking, captions, fullscreen  
+✅ **Secure**: Encrypted API keys, no telemetry, privacy-first  
 
-## 📋 Project Structure
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ and npm
+- Chrome/Chromium browser
+- OpenAI API key (get one at https://platform.openai.com/)
+
+### Installation
+
+1. **Clone and install**
+   ```bash
+   git clone https://github.com/ANKITSANJYAL/YJarvis.git
+   cd YJarvis
+   npm install
+   ```
+
+2. **Build the extension**
+   ```bash
+   npm run build
+   ```
+
+3. **Load in Chrome**
+   - Open `chrome://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked"
+   - Select the `dist` folder
+
+4. **Setup API Key**
+   - Click the extension icon
+   - Go to Settings tab
+   - Enter your OpenAI API key
+   - Save and you're ready!
+
+## 📖 Usage
+
+### Voice Commands
+
+Activate with "Jarvis" or "Dummy" followed by your command:
 
 ```
-YJarvis/
-├── manifest.json              # Chrome extension manifest
-├── background/                # Service worker (AI engine)
-│   ├── service-worker.js      # Main background script
-│   ├── openai-client.js       # OpenAI API integration
-│   └── message-handler.js     # Message routing
-├── content/                   # Content scripts (YouTube integration)
-│   ├── content-script.js      # Main content script
-│   ├── player-controller.js   # Video player control
-│   ├── transcript-extractor.js # Transcript extraction
-│   ├── voice-controller.js    # Speech recognition
-│   └── command-processor.js   # Command parsing & execution
-├── popup/                     # Extension popup UI
-│   ├── popup.html
-│   ├── popup.css
-│   └── popup.js
-├── test/                      # Modular test files
-│   ├── test-openai.html       # Test AI features
-│   ├── test-player.html       # Test video controls
-│   ├── test-voice.html        # Test voice recognition
-│   └── test-commands.html     # Test command parsing
-└── icons/                     # Extension icons
+"Jarvis, pause the video"
+"Jarvis, skip forward 30 seconds"
+"Jarvis, set volume to 50 percent"
+"Jarvis, search for React tutorials"
+"Jarvis, play at 1.5x speed"
+"Jarvis, go to 2 minutes"
+"Jarvis, turn on captions"
+"Jarvis, fullscreen"
 ```
 
-## 🧪 Testing Instructions
+### Extension Features
 
-### Phase 1: Module Testing (Before Chrome Extension)
-
-You can test each component independently in your browser before loading as a Chrome extension.
-
-#### 1️⃣ Test OpenAI Integration
-
-```bash
-# Open in browser
-open test/test-openai.html
-```
-
-**What to test:**
-- Enter your OpenAI API key (starts with `sk-proj-...`)
-- Test summary generation with sample transcript
-- Test quiz generation
-- Test TTS (text-to-speech)
-- Test command processing
-- **Verify latency** is under 2 seconds for each operation
-
-#### 2️⃣ Test Video Player Controls
-
-```bash
-# Open in browser
-open test/test-player.html
-```
-
-**What to test:**
-- Play/Pause controls
-- Skip forward/backward (10s, 30s)
-- Speed controls (0.25x - 2x)
-- Volume and mute
-- Seek to specific time
-- Verify all controls work smoothly
-
-#### 3️⃣ Test Voice Recognition
-
-```bash
-# Open in browser (Chrome/Edge/Safari recommended)
-open test/test-voice.html
-```
-
-**What to test:**
-- Click microphone button to start
-- Speak various commands
-- Verify commands are recognized accurately
-- Test auto-restart after errors
-- Check recognition speed
-
-**Try saying:**
-- "play"
-- "pause"
-- "skip 30 seconds"
-- "speed up"
-- "summarize"
-- "what is machine learning?"
-
-#### 4️⃣ Test Command Parsing
-
-```bash
-# Open in browser
-open test/test-commands.html
-```
-
-**What to test:**
-- Enter various commands
-- Verify pattern matching works
-- Test parameter extraction (e.g., numbers in "skip 30")
-- Try example commands
-- Test edge cases
-
-### Phase 2: Chrome Extension Testing
-
-Once module tests pass, load as a Chrome extension.
-
-#### Step 1: Load Extension
-
-1. Open Chrome and go to `chrome://extensions/`
-2. Enable "Developer mode" (toggle in top-right)
-3. Click "Load unpacked"
-4. Select the `YJarvis` folder
-5. Extension should now appear in your toolbar
-
-#### Step 2: Configure API Key
-
-1. Click the YJarvis extension icon
-2. Enter your OpenAI API key
-3. Click "Save"
-4. You should see "API key saved successfully!"
-
-#### Step 3: Test on YouTube
-
-1. Go to any YouTube video **with captions/transcript**
-   - Example: https://www.youtube.com/watch?v=aircAruvnKk
-2. Look for the "🎤 YJarvis" button (bottom-right of page)
-3. Click the button - it will extract the transcript
-4. Button changes to "🔴 Listening..."
-5. Start speaking commands!
-
-#### Test Commands Checklist
-
-**Basic Controls:**
-- [ ] "play" - starts video
-- [ ] "pause" - pauses video
-- [ ] "skip 30 seconds" - skips forward
-- [ ] "rewind 10" - goes backward
-- [ ] "speed up" - increases playback speed
-- [ ] "slow down" - decreases speed
-- [ ] "normal speed" - resets to 1x
-- [ ] "mute" - mutes audio
-- [ ] "unmute" - unmutes audio
-
-**AI Features:**
-- [ ] "summarize" - generates and speaks summary
-- [ ] "quiz" - generates quiz questions
-- [ ] "what is [topic]?" - answers questions about video
-
-**Expected Behavior:**
-- Commands execute within 100ms (for controls)
-- AI responses within 2 seconds
-- TTS plays automatically
-- Button shows status (Processing, Done, Error)
-
-## 🎯 Performance Benchmarks
-
-Target latencies (from button click to completion):
-
-| Operation | Target | Measured |
-|-----------|--------|----------|
-| Transcript extraction | <1s | ___ |
-| Voice recognition | <500ms | ___ |
-| Summary generation | <2s | ___ |
-| Quiz generation | <2s | ___ |
-| TTS generation | <1.5s | ___ |
-| Command execution | <100ms | ___ |
-
-## 🔧 Troubleshooting
-
-### Extension doesn't load
-- Check `chrome://extensions/` for errors
-- Verify all files are in place
-- Check browser console for errors
-
-### Voice recognition not working
-- Only works in Chrome, Edge, Safari
-- Must use HTTPS or localhost
-- Check microphone permissions
-- Verify Web Speech API support
-
-### Transcript not found
-- Video must have captions/transcript enabled
-- Click the "Show transcript" button manually first
-- Some videos don't have transcripts
-
-### API errors
-- Verify API key is correct (starts with `sk-proj-`)
-- Check OpenAI account has credits
-- Check console for specific error messages
-- Verify network connection
-
-### Performance issues
-- Check network latency to OpenAI API
-- Verify `gpt-4o-mini` model access
-- Monitor Chrome DevTools performance tab
-- Check for console errors
+- **Dashboard**: Voice visualizer, quota monitoring, quick actions
+- **Summary**: Generate video summaries at different detail levels
+- **Flashcards**: Create and review flashcards with spaced repetition
+- **Quiz**: Test your understanding with AI-generated questions
+- **Settings**: Configure API keys, voice settings, privacy controls
 
 ## 🛠️ Development
 
-### Code Organization
+### Build & Quality Gates
 
-**Modular design** for easy testing and maintenance:
+```bash
+npm install                                    # Install dependencies
+npm run lint && npm run type-check            # Quality checks
+npm run test                                  # Run tests
+npm run build                                 # Production build
+```
 
-- **`background/`**: All AI processing (runs in service worker)
-- **`content/`**: YouTube page integration (runs on youtube.com)
-- **`popup/`**: Settings UI (extension popup)
-- **`test/`**: Standalone test files (for development)
+### Development Mode
 
-### Key Design Decisions
+```bash
+npm run dev          # Development build with watch mode
+npm run build:dev    # Development build with source maps
+```
 
-1. **ES6 Modules**: Clean imports/exports for testability
-2. **Exponential Backoff**: Robust API retry logic
-3. **Performance First**: Optimized model selection (gpt-4o-mini, tts-1)
-4. **Error Handling**: Graceful degradation on failures
-5. **Real-time Feedback**: Status updates at every step
+## Features (Phase 1–4)
 
-## 📝 API Requirements
+- Wake word voice control (Jarvis/Dummy), play/pause/seek/volume
+- Intelligent search + ranking + 1-hour cache
+- Transcript fetch + summarization (brief/standard/detailed)
+- Flashcards (SM-2) + export; Quiz generator + grading
 
-You need an OpenAI API key with access to:
-- `gpt-4o-mini` (Chat Completions)
-- `tts-1` (Text-to-Speech)
+## Security & Privacy
 
-Get your key at: https://platform.openai.com/api-keys
+- API key encrypted (Web Crypto AES-GCM) in `chrome.storage.local`
+- Minimal host permissions; CSP-friendly build
+- No telemetry by default; optional analytics can be added
 
-## 🎓 Next Steps
+## Testing
 
-After testing:
-1. [ ] Verify all modules work independently
-2. [ ] Test as Chrome extension
-3. [ ] Measure actual latencies
-4. [ ] Optimize based on results
-5. [ ] Add UI polish (later phase)
-6. [ ] Add more command patterns
-7. [ ] Implement quiz answer checking
-8. [ ] Add history/favorites
+- Unit: Jest + jsdom; E2E: Playwright (to be expanded)
 
-## 📄 License
+## Next
 
-MIT License - See proposal.json for full project details
-
----
-
-**Built for real-time performance and seamless user experience** 🚀
+- Accessibility polish, performance optimization, integration/E2E coverage, docs
